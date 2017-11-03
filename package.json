@@ -2,7 +2,7 @@
   "name": "coderland",
   "version": "1.0.0",
   "scripts": {
-    "start": "node ./build/server/server.js",
+    "start": "node ./build/server.js",
     "develop": "npm-run-all --parallel watch*",
     "watch-start": "nodemon --delay 5 -w ./build ./build/server.js",
     "watch-server": "tsc -w",
