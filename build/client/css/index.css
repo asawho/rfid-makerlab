@@ -1,3 +1,13 @@
 body {
     margin: 1em;
 }
+
+table {
+    min-width: 80%;
+}
+
+table td {
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-bottom: 0.25em;
+}

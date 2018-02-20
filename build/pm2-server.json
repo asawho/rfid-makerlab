@@ -1,0 +1,11 @@
+{
+  "apps" : [
+    {
+      "name"        : "Durango MakerLab Device and Premise Access System",
+      "script"      : "server.js",
+      "watch"       : false,
+      "cwd"         : "/home/pi/rfid-door/build",
+      "out_file"    : "/dev/null",
+      "error_file"  : "/dev/null"
+    }]
+}

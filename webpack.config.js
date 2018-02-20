@@ -13,11 +13,15 @@ module.exports = {
   },
   plugins: [
     new CopyWebpackPlugin([
-      { from: './client/static' }
+      { from: './client/static' },
+      { from: './server/', to: '../' },
+      { from: './devices/', to: '../devices'}
+      //{ from: './server/pm2-server.json', to: '../' },
+      //{ from: './server/data', to: '../data' }
     ])
   ],
   resolve: {
-    extensions: ['', '.js', '.ts', '.tsx']
+    extensions: ['.js', '.ts', '.tsx']
   },
   module: {
     loaders: [{

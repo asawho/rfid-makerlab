@@ -1,0 +1,13 @@
+[
+    {
+        "name": "Access Cutter",
+        "rfid": "6F007F12C3C1",
+        "makerlab-entrance": "x",
+        "laser-cutter": "x"
+    },
+    {
+        "name": "No Momma Cutter",
+        "rfid": "6F007F503A7A",
+        "makerlab-entrance": "x"
+    }
+]

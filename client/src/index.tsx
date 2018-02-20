@@ -3,113 +3,182 @@ import * as ReactDOM from 'react-dom';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 
-interface Machine {
-	id:string,
-	name:string;
-	inUse:boolean;
-	inUseBy:string;
-	inUseStarted:Date;
-	image:string;
-	isScanning:boolean;
-	messages:string[];
-}
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 
 class Application extends React.Component<any,any> {
-	private dataTimer:any;
+	private queryTimer:any;
+	private accessTimer:any;
+	private fileInput:any;
 
 	constructor(props) {
 		super(props);
+
 		this.state = {
-			machines: []
+			accessUploadMsg: '',
+			accessList: [],
+			deviceList: [],
+			userList: [],
+			activityList: []
 		};
-		this.onClickButton=this.onClickButton.bind(this);
+		this.onChangeAccessList = this.onChangeAccessList.bind(this);
 	}
 
-	onClickButton(name:string) {
-		var cm = _.find(this.state.machines, (a:Machine) => a.name==name);
-		if (cm) {
-			//Let the server know which machine we want to work with
-			fetch('/client-request-scan/' + cm.id).then((res) => {
-				if (res.status==200) {
-					//Pre-set, truth still determined by server
-					cm.isScanning = true;
-					this.setState({machines: this.state.machines});
-				} else {					
-					console.log('Error requesting scan: ' + res.toString());
-				}
-			});
-		}
+	onChangeAccessList (e) {
+		if (!e.target.value) return;
+		var formData = new FormData();
+		this.setState({ accessUploadMsg : '(Updating...)' });
+		formData.append('accesslist', e.target.files[0]);
+		fetch('/access-list', {
+			method: 'POST',
+  			body: formData
+		}).then((res) => {
+			if (res.status==200) {
+				this.fileInput.value='';	//Clear the file input after upload
+				//Force refresh the access list
+				this.getAccessList().then(() => {
+					this.setState({ accessUploadMsg : '(Successfully Updated)' })
+				});
+			} else {					
+				this.setState({ accessUploadMsg : '(Unable to Update: ' + res.toString() + ')' });
+			}
+		});
+	}
+
+	getAccessList() {
+		return fetch('/access-list').then((res) => {
+			if (res.status==200) {
+				res.json().then((data) => {
+					//Withdraw a set of unique devices
+					var deviceList=[];
+					if (data && data.length) {
+						for (var prop in data[0]) {
+							if (prop!='name' && prop!='rfid') {
+								deviceList.push(prop);
+							}
+						}	
+					}
+					//Withdraw a set of unique users
+					var userList = [];
+					if (data) {
+						userList=_.map(data, (user:any) => { return user.name; });
+					}
+
+					this.setState ({ 
+						accessList: data, 
+						deviceList: deviceList,
+						userList: userList
+					});
+				});					
+			} else {
+				console.log('Error reading access-list: ' + res.toString());
+			}				
+			if (this.accessTimer) clearTimeout(this.accessTimer);
+			this.accessTimer=setTimeout(this.getAccessList.bind(this), 1000*60*10);
+		});
+	}
+
+	queryData() {
+		//Live data
+		return fetch('/query').then((res) => {
+			if (res.status==200) {
+				res.json().then((data) => {
+					this.setState ({ activityList: data });
+				});					
+			} else {
+				console.log('Error reading status: ' + res.toString());
+			}				
+			if (this.queryTimer) clearTimeout(this.queryTimer);
+			this.queryTimer=setTimeout(this.queryData.bind(this), 5000);
+		});
 	}
 
 	componentDidMount() {
-		//Start retrieving data
-		function serverState() {
-			//Live data
-			fetch('/machine-status').then((res) => {
-				if (res.status==200) {
-					res.json().then((data) => {
-						//console.log(JSON.stringify(data, null, 3));
-						this.setState ({ machines: data });
-					});					
-				} else {
-					console.log('Error reading status: ' + res.toString());
-				}				
-				this.dataTimer=setTimeout(serverState.bind(this), 1000);
-			});
-		}
-		serverState.bind(this)();
+		//Get the access list, do it every couple of minutes in case some other console updates it
+		this.getAccessList();
+		
+		//Start retrieving live log data
+		this.queryData();
 	}
 
 	componentWillUnmount() {
-		clearTimeout(this.dataTimer);
+		if (this.queryTimer) clearTimeout(this.queryTimer);
+		if (this.accessTimer) clearTimeout(this.accessTimer);
 	}
 
 	render() { 
-		var style = { 
-			textAlign:'center', 
-			backgroundColor: '#dddddd',
-			marginTop:'10px',
-			marginBottom:'10px',
-			padding: '10px',
-			border: 'solid grey 1px'
-		};
+		//Setup the access list tab
+		let accLst = [<h3>Loading or no users exist and you should upload some....</h3>];
+		if (this.state.accessList && this.state.accessList.length) {
+			let header=[<td><b>User</b></td>, <td><b>RFID Tag</b></td>];
+			_.forEach(this.state.deviceList, (name) => {
+				header.push(<td><b>{ name }</b></td>);
+			});
+			accLst=[<tr> { header } </tr>];
+			_.forEach(this.state.accessList, (user) => {
+				var cols = [];
+				cols.push(<td>{ user.name }</td>);
+				cols.push(<td>{ user.rfid }</td>);
+				_.forEach(this.state.deviceList, (name) => {
+					cols.push(<td>{ user[name] }</td>);
+				});
+				accLst.push(<tr>{cols}</tr>);
+			});
 
-		var anyScanning = _.find(this.state.machines, (a:Machine) => a.isScanning);
+			accLst = [<table> { accLst } </table>];
+		}
 
-		var tiles = this.state.machines.map((a:Machine) => {
-			var usage;
-			if (a.inUse) {
-				usage = "In use by " + a.inUseBy + " starting " + moment(a.inUseStarted).calendar().toLowerCase() + ".";
-			} else {
-				usage = "Not in use."
-			}
+		//Setup the activity list tab
+		let queryLst = [<h3>Loading or no activity log entries exist....</h3>];
+		if (this.state.activityList && this.state.activityList.length) {
+			let header=[
+				<td><b>Date</b></td>, 
+				<td><b>Type</b></td>, 
+				<td><b>User</b></td>, 
+				<td><b>RFID</b></td>,				
+				<td><b>Machine</b></td>,
+				<td><b>Message</b></td>
+			];
+			queryLst=[<tr> { header } </tr>];
+			_.forEach(this.state.activityList, (act) => {
+				queryLst.push(<tr>
+					<td>{ moment(act.timestamp).format('MM/DD, h:mm:ss a') }</td>
+					<td>{ act.level }</td>
+					<td>{ act.user }</td>
+					<td>{ act.rfid }</td>
+					<td>{ act.machineId }</td>
+					<td>{ act.message }</td>					
+				</tr>);
+			});
 
-			var disabled = anyScanning && !a.isScanning;
-			var classes = "btn btn-lg " + (a.inUse ? 'btn-danger' : 'btn-success');
-			var txt;
-			if (a.isScanning) {
-				txt = [<i className='fa fa-spinner fa-spin'></i>, ' Scan Your Badge'];
-			} else {
-				txt = a.inUse ? 'Disable (or take over)' : 'Enable';
-			}
-			var button = <button disabled={disabled} onClick={(event) => { this.onClickButton(a.name) }} style={{ width:'100%'}} type="button" className={classes}>{txt}</button>;
+			queryLst = [<table> { queryLst } </table>];
+		}
 
-			return <div key={a.name} className="col-md-3">
-				<div style={style}>
-					<h2>{a.name}</h2>
-					<h3>{a.inUse ? 'In Use by ' + a.inUseBy : 'Available'}</h3>
-					{a.inUse ? <p>{"since " + moment(a.inUseStarted).calendar().toLowerCase()}</p>:<p>&nbsp;</p>}
-					<h4 style={{marginTop:'2em'}} className="text-primary" >{a.messages}&nbsp;</h4>
-					<p>{button}</p>
-				</div>
-			</div>
-		})
+		return (
+			<div>
+				<h1>Durango MakerLab Device and Premise Access System</h1>
+				<Tabs>
+					<TabList>
+						<Tab>Access Logs</Tab>
+						<Tab>User Access List</Tab>
+						<Tab>Device Status</Tab>
+					</TabList>
 
-		return (<div className="container-fluid">
-			<div className="row">
-				{tiles}
-			</div>
-		</div>);
+					<TabPanel>
+						{ queryLst }
+					</TabPanel>
+					<TabPanel>
+					<form>
+						Update the Access List by uploading a csv file with a column for the users Name, RFID, and a column for each device with a header row containing the device id.  For each device, an 'x' in the column indicates the user has access while any other value will not grant access.
+						{ this.state.accessUploadMsg }: <input style={{ display:'inline' }} type="file" onChange={this.onChangeAccessList} ref = { (r) => { this.fileInput = r; } }/> 
+					</form> 
+					{ accLst }
+					</TabPanel>
+					<TabPanel>
+						<h3>Todo, display a list of active devices based on the last request for the access-list...</h3>
+					</TabPanel>
+				</Tabs>
+			</div>);
+		
 	}
 }
 

@@ -13,10 +13,5 @@
     "sourceMap": true,
     "moduleResolution": "node"
   },
-  "exclude": [
-    "client",
-    "node_modules",
-    "build",
-    "webpack.config.js"
-  ]
+  "include": [ "client" ]
 }
