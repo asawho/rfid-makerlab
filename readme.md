@@ -73,6 +73,17 @@ sudo apt-get install -y nodejs
 sudo apt-get install -y build-essential
 sudo apt-get install -y git
 
+#set a static ip (only needed for server device)
+ip -4 addr show | grep global   # get ip address and broadcast address
+ip route | grep default | awk '{print $3}'  # get gateway
+cat /etc/resolv.conf    # get nameserver
+sudo nano /etc/dhcpcd.conf
+
+interface wlan0
+static ip_address=192.168.1.14/24
+static routers=192.168.1.1
+static domain_name_servers=192.168.1.1
+
 #set up smb (only for development)
 sudo apt-get install samba samba-common-bin
 sudo nano /etc/samba/smb.conf
