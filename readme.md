@@ -1,4 +1,4 @@
-# Durango MakerLab Device and Premise Access System
+# Lab Device and Premise Access System
 
 ## Introduction
 This system is broken up into two parts, the log/application server and the devices.  The log/application server will simply be called the server, and it provides a central location for the devices to log their activity and status to.  The server also provides a website that shows the logs and device status as well as letting a user update the access list.  The devices and the server use the winston library to provide access/error logging.  This provided off the shelf logging both locally, across the network and with multiple transports including email for notification of devices going down and errors.
@@ -65,9 +65,12 @@ My own notes to go with this as to what I did to setup a brand new Pi flashed wi
 sudo apt update
 sudo apt full-upgrade
 
-#install node, https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions
+#install node on pi 3, https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 sudo apt-get install -y nodejs
+
+#install node on pi zero w, https://github.com/sdesalas/node-pi-zero
+wget -O - https://raw.githubusercontent.com/sdesalas/node-pi-zero/master/install-node-v8.9.0.sh | bash
 
 #install build tools, build native add-ons and junk
 sudo apt-get install -y build-essential
@@ -99,3 +102,5 @@ create mask=0644
 directory mask=0755
 public=no
 ```
+#Set the password
+sudo smbpasswd -a pi

@@ -1,5 +1,8 @@
-tags.json
-server/build
+#Skip all the client specific configs
+build/config.js
+build/data/*
+build/devices/config.js
+build/devices/data/*
 
 # Logs
 logs
