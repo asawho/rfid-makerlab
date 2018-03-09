@@ -32,6 +32,31 @@ function setupLoggingServer() {
     http.listen();
     console.log('Winston Log server Listening on port: 8081');
 
+    //This is super ugly, but no other idea at this point.  Randomly, junk lines appear in the log output, this destroys
+    //the query logic below.  So, just routinely clean it up.  I didn't want to do this on query as that is called every 15 
+    //seconds or something by the browser.  Since this is all done Sync style, we shouldn't disrupt any winston action
+    let fn = () => {
+        var regex=/^[^{]/gim;
+        if (fs.existsSync(__dirname + cfg.logActivityLocation)) {
+            var data = fs.readFileSync(__dirname + cfg.logActivityLocation, 'utf-8');
+            //Quick test and bail if no problems
+            if (regex.test(data)) {
+                var lines = data.replace(/\r\n/g,'\n').split('\n');
+                var newlines = [];
+                for (var i=0; i<lines.length; i++) {
+                    if (lines[i].length && lines[i][0]=="{") {
+                        newlines.push(lines[i]);
+                    }
+                }
+                var newValue = newlines.join('\n');
+                fs.writeFileSync(__dirname + cfg.logActivityLocation, newValue, 'utf-8');
+            }
+        }
+        setTimeout(fn, 1000*60*10);
+    };
+    fn();
+
+
     return (http);
 }
 
@@ -91,10 +116,14 @@ function setupAppServer(logger) {
     });
     
     //Activity Query
-    app.get('/query', nocache, function (req, res) {
+    app.get('/query/:days?', nocache, function (req, res) {
+        let days=7;
+        if (req.params.days && _.isNumber(req.params.days*1)) {
+            days = req.params.days*1
+        }
         //Hard coded last 7 days for now
         const options = {
-            from: new Date() - (7 * 24 * 60 * 60 * 1000),
+            from: new Date() - (days * 24 * 60 * 60 * 1000),
             until: new Date(),
             limit: 100000,
             start: 0,

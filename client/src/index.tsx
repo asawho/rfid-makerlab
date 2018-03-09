@@ -5,6 +5,8 @@ import * as moment from 'moment';
 
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 
+const LabEntranceMachineID:string = "makerlab-entrance";
+
 class Application extends React.Component<any,any> {
 	private queryTimer:any;
 	private accessTimer:any;
@@ -18,9 +20,13 @@ class Application extends React.Component<any,any> {
 			accessList: [],
 			deviceList: [],
 			userList: [],
-			activityList: []
+			activityList: [],
+			filterDaySelected: 7,
+			filterUserSelected: undefined,
+			filterDeviceSelected: undefined
 		};
 		this.onChangeAccessList = this.onChangeAccessList.bind(this);
+		this.handleInputChange = this.handleInputChange.bind(this);
 	}
 
 	onChangeAccessList (e) {
@@ -77,9 +83,9 @@ class Application extends React.Component<any,any> {
 		});
 	}
 
-	queryData() {
+	queryData(days?:number) {
 		//Live data
-		return fetch('/query').then((res) => {
+		return fetch('/query' + (days ? '/' + days : '')).then((res) => {
 			if (res.status==200) {
 				res.json().then((data) => {
 					this.setState ({ activityList: data });
@@ -88,7 +94,8 @@ class Application extends React.Component<any,any> {
 				console.log('Error reading status: ' + res.toString());
 			}				
 			if (this.queryTimer) clearTimeout(this.queryTimer);
-			this.queryTimer=setTimeout(this.queryData.bind(this), 5000);
+			//Be way smarter here, when these logs get big this will be silly
+			this.queryTimer=setTimeout(this.queryData.bind(this, this.state.filterDaySelected), 30000);
 		});
 	}
 
@@ -97,7 +104,7 @@ class Application extends React.Component<any,any> {
 		this.getAccessList();
 		
 		//Start retrieving live log data
-		this.queryData();
+		this.queryData(this.state.filterDaySelected);
 	}
 
 	componentWillUnmount() {
@@ -105,9 +112,160 @@ class Application extends React.Component<any,any> {
 		if (this.accessTimer) clearTimeout(this.accessTimer);
 	}
 
-	render() { 
+	handleInputChange(event) {
+		const target = event.target;
+		const value = target.type === 'checkbox' ? target.checked : target.value;
+		const name = target.name;
+
+		//Handle the change
+		switch (name) {
+			case "filterDaySelected": 
+				this.setState({ [name]: value });
+				this.queryData(value);
+				break;
+			default:
+				this.setState({ [name]: value });
+		}	
+	}
+
+	renderBuildingLog (log:any[]) {
+		//Setup the activity list tab
+		let queryLst = [<span>Loading or no activity log entries exist....</span>];
+
+		//Filter out data (days is alread done on server request, but for now...)
+		log = log || [];
+		log = _.filter(log, (a) => { return a.machineId==LabEntranceMachineID; });
+		if (this.state.filterUserSelected) log = _.filter(log, (a) => { return a.user==this.state.filterUserSelected; });
+
+		let userOptions = _.map(this.state.userList, (a:string) => { return (<option value={a}>{a}</option>); });
+		userOptions=[<option value="">All</option>, <option value="Unknown">Unknown</option>].concat(userOptions);
+
+		let header=[
+			<td>
+				<b>Date</b> - 
+					<select name="filterDaySelected" value={this.state.filterDaySelected}  onChange={this.handleInputChange}>
+						<option value="7">Last 7 Days</option>
+						<option value="30">Last 30 Days</option>
+						<option value="60">Last 60 Days</option>
+						<option value="90">Last 90 Days</option>
+					</select>
+			</td>, 
+			<td>
+				<b>User</b> - <select name="filterUserSelected" value={this.state.filterUserSelected}  onChange={this.handleInputChange}>{ userOptions }</select>
+			</td>, 
+			<td><b>RFID</b></td>,				
+			<td><b>Message</b></td>
+		];
+		queryLst=[<tr> { header } </tr>];
+		_.forEach(log, (act) => {
+   			//if (act.level==='error') return;
+			queryLst.push(<tr>
+				<td>{ moment(act.timestamp).format('MM/DD/YYYY h:mm a') }</td>
+				<td>{ act.user }</td>
+				<td>{ act.rfid }</td>
+				<td>{ act.message }</td>					
+			</tr>);
+		});
+
+		queryLst = [<table> { queryLst } </table>];
+		return queryLst;		
+		
+	}
+
+	renderDeviceLog (log:any[]) {
+		//Setup the activity list tab
+		let queryLst = [<span>Loading or no activity log entries exist....</span>];
+		let durationTotal=0;
+
+		//Filter out data (could have already been done on server request, but for now...)
+		log = log || [];
+		if (this.state.filterUserSelected) log = _.filter(log, (a) => { return a.user==this.state.filterUserSelected; });
+		if (this.state.filterDeviceSelected) {
+			log = _.filter(log, (a) => { return a.machineId==this.state.filterDeviceSelected; });
+		} else {
+			log = _.filter(log, (a) => { return a.machineId!=LabEntranceMachineID; });
+		}
+
+		//Merge enable/disable pairs and add duration column to enable/disable pairs			
+		var nlog:any[] = [];
+		for (var i=0; i<log.length; i++) {
+			//If this is a shutoff row
+			if (log[i].message==='disabled') {
+				//If the next row exists and is a turn on row
+				if (i+1 < log.length && log[i+1].message==='enabled') {
+					//Finally if the users are the same, then set the duration column
+					if (log[i].rfid == log[i+1].rfid) {
+						var hours = Math.floor((moment(log[i].timestamp).diff(moment(log[i+1].timestamp))/1000/60/60)*100)/100;
+						durationTotal+=hours;
+
+						nlog.push({
+							timestamp: moment(log[i+1].timestamp).format('MM/DD/YYYY h:mm ') + ' to ' + moment(log[i].timestamp).format('h:mm a'),
+							duration: hours + ' hrs',
+							user: log[i+1].user,
+							rfid: log[i+1].rfid,
+							machineId: log[i+1].machineId
+						});
+						log[i].duration = hours;
+						i++;
+						continue;
+					}
+				} 
+			}
+			nlog.push({
+				timestamp: moment(log[i].timestamp).format('MM/DD/YYYY h:mm a'),
+				user: log[i].user,
+				rfid: log[i].rfid,
+				machineId: log[i].machineId
+			});
+		}
+
+		let userOptions = _.map(this.state.userList, (a:string) => { return (<option value={a}>{a}</option>); });
+		userOptions=[<option value="">All</option>, <option value="Unknown">Unknown</option>].concat(userOptions);
+		let deviceOptions = _.map(_.filter(this.state.deviceList, (a) => { a!=LabEntranceMachineID }), (a:string) => { return (<option value={a}>{a}</option>); });
+		deviceOptions=[<option value="">All</option>].concat(deviceOptions);
+
+		let header=[
+			<td>
+				<b>Date</b> - 
+					<select name="filterDaySelected" value={this.state.filterDaySelected} onChange={this.handleInputChange}>
+						<option value="7">Last 7 Days</option>
+						<option value="30">Last 30 Days</option>
+						<option value="60">Last 60 Days</option>
+						<option value="90">Last 90 Days</option>
+					</select>
+			</td>, 
+			<td>
+				<b>Duration (hr) - { durationTotal } </b>
+			</td>, 
+			<td>
+				<b>User</b> - <select name="filterUserSelected" value={this.state.filterUserSelected} onChange={this.handleInputChange}>{ userOptions }</select>
+			</td>, 
+			<td><b>RFID</b></td>,				
+			<td>
+				<b>Device</b> - <select name="filterDeviceSelected" value={this.state.filterDeviceSelected} onChange={this.handleInputChange}>{ deviceOptions }</select>
+			</td>,
+			<td><b>Message</b></td>
+		];
+		queryLst=[<tr> { header } </tr>];
+		_.forEach(nlog, (act) => {
+   			//if (act.level==='error') return;
+			queryLst.push(<tr>
+				<td>{ act.timestamp }</td>
+				<td>{ act.duration }</td>
+				<td>{ act.user }</td>
+				<td>{ act.rfid }</td>
+				<td>{ act.machineId }</td>
+				<td>{ act.message }</td>					
+			</tr>);
+		});
+
+		queryLst = [<table> { queryLst } </table>];
+		return queryLst;		
+	}
+
+	renderAccessList() {
 		//Setup the access list tab
-		let accLst = [<h3>Loading or no users exist and you should upload some....</h3>];
+		let accLst = [<span>Loading or no users exist and you should upload some....</span>];
 		if (this.state.accessList && this.state.accessList.length) {
 			let header=[<td><b>User</b></td>, <td><b>RFID Tag</b></td>];
 			_.forEach(this.state.deviceList, (name) => {
@@ -126,56 +284,36 @@ class Application extends React.Component<any,any> {
 
 			accLst = [<table> { accLst } </table>];
 		}
+		return accLst;
+	}
 
-		//Setup the activity list tab
-		let queryLst = [<h3>Loading or no activity log entries exist....</h3>];
-		if (this.state.activityList && this.state.activityList.length) {
-			let header=[
-				<td><b>Date</b></td>, 
-				<td><b>Type</b></td>, 
-				<td><b>User</b></td>, 
-				<td><b>RFID</b></td>,				
-				<td><b>Machine</b></td>,
-				<td><b>Message</b></td>
-			];
-			queryLst=[<tr> { header } </tr>];
-			_.forEach(this.state.activityList, (act) => {
-				queryLst.push(<tr>
-					<td>{ moment(act.timestamp).format('MM/DD, h:mm:ss a') }</td>
-					<td>{ act.level }</td>
-					<td>{ act.user }</td>
-					<td>{ act.rfid }</td>
-					<td>{ act.machineId }</td>
-					<td>{ act.message }</td>					
-				</tr>);
-			});
-
-			queryLst = [<table> { queryLst } </table>];
-		}
+	render() { 
+		let buildingLst = this.renderBuildingLog(this.state.activityList); 
+		let deviceLst = this.renderDeviceLog(this.state.activityList);
+		let accLst = this.renderAccessList();
 
 		return (
 			<div>
-				<h1>Durango MakerLab Device and Premise Access System</h1>
+				<h1>MakerLab Device and Premise Access System</h1>
 				<Tabs>
 					<TabList>
-						<Tab>Access Logs</Tab>
+						<Tab>Entry Logs</Tab>
+						<Tab>Device Logs</Tab>
 						<Tab>User Access List</Tab>
-						<Tab>Device Status</Tab>
 					</TabList>
-
 					<TabPanel>
-						{ queryLst }
+						{ buildingLst }
 					</TabPanel>
 					<TabPanel>
-					<form>
-						Update the Access List by uploading a csv file with a column for the users Name, RFID, and a column for each device with a header row containing the device id.  For each device, an 'x' in the column indicates the user has access while any other value will not grant access.
-						{ this.state.accessUploadMsg }: <input style={{ display:'inline' }} type="file" onChange={this.onChangeAccessList} ref = { (r) => { this.fileInput = r; } }/> 
-					</form> 
-					{ accLst }
+						{ deviceLst }
 					</TabPanel>
 					<TabPanel>
-						<h3>Todo, display a list of active devices based on the last request for the access-list...</h3>
-					</TabPanel>
+						<form>
+							Update the Access List by uploading a csv file with a column for the users Name, RFID, and a column for each device with a header row containing the device id.  For each device, an 'x' in the column indicates the user has access while any other value will not grant access.  NOTE: The maker lab entrance lock column must be titled "{LabEntranceMachineID}"
+							{ this.state.accessUploadMsg }: <input style={{ display:'inline' }} type="file" onChange={this.onChangeAccessList} ref = { (r) => { this.fileInput = r; } }/> 
+						</form> 
+						{ accLst }
+					</TabPanel>					
 				</Tabs>
 			</div>);
 		

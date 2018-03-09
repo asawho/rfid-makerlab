@@ -3,6 +3,7 @@ build/config.js
 build/data/*
 build/devices/config.js
 build/devices/data/*
+build/devices/pm2-device.json
 
 # Logs
 logs

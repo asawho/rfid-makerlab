@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "start": "node ./build/server.js",
-    "build": "webpack"
+    "build": "webpack",
+    "build-watch": "webpack -w"
   },
   "author": "",
   "license": "ISC",
@@ -41,6 +42,6 @@
     "script-loader": "^0.7.0",
     "style-loader": "^0.13.1",
     "typescript": "^2.7.2",
-    "webpack": "^4.1.0"
+    "webpack": "^3.11.0"
   }
 }

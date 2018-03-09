@@ -26679,6 +26679,7 @@ const ReactDOM = __webpack_require__(227);
 const _ = __webpack_require__(313);
 const moment = __webpack_require__(0);
 const react_tabs_1 = __webpack_require__(316);
+const LabEntranceMachineID = "makerlab-entrance";
 class Application extends React.Component {
     constructor(props) {
         super(props);
@@ -26687,9 +26688,13 @@ class Application extends React.Component {
             accessList: [],
             deviceList: [],
             userList: [],
-            activityList: []
+            activityList: [],
+            filterDaySelected: 7,
+            filterUserSelected: undefined,
+            filterDeviceSelected: undefined
         };
         this.onChangeAccessList = this.onChangeAccessList.bind(this);
+        this.handleInputChange = this.handleInputChange.bind(this);
     }
     onChangeAccessList(e) {
         if (!e.target.value)
@@ -26743,8 +26748,8 @@ class Application extends React.Component {
             this.accessTimer = setTimeout(this.getAccessList.bind(this), 1000 * 60 * 10);
         });
     }
-    queryData() {
-        return fetch('/query').then((res) => {
+    queryData(days) {
+        return fetch('/query' + (days ? '/' + days : '')).then((res) => {
             if (res.status == 200) {
                 res.json().then((data) => {
                     this.setState({ activityList: data });
@@ -26755,12 +26760,12 @@ class Application extends React.Component {
             }
             if (this.queryTimer)
                 clearTimeout(this.queryTimer);
-            this.queryTimer = setTimeout(this.queryData.bind(this), 5000);
+            this.queryTimer = setTimeout(this.queryData.bind(this, this.state.filterDaySelected), 30000);
         });
     }
     componentDidMount() {
         this.getAccessList();
-        this.queryData();
+        this.queryData(this.state.filterDaySelected);
     }
     componentWillUnmount() {
         if (this.queryTimer)
@@ -26768,8 +26773,153 @@ class Application extends React.Component {
         if (this.accessTimer)
             clearTimeout(this.accessTimer);
     }
-    render() {
-        let accLst = [React.createElement("h3", null, "Loading or no users exist and you should upload some....")];
+    handleInputChange(event) {
+        const target = event.target;
+        const value = target.type === 'checkbox' ? target.checked : target.value;
+        const name = target.name;
+        switch (name) {
+            case "filterDaySelected":
+                this.setState({ [name]: value });
+                this.queryData(value);
+                break;
+            default:
+                this.setState({ [name]: value });
+        }
+    }
+    renderBuildingLog(log) {
+        let queryLst = [React.createElement("span", null, "Loading or no activity log entries exist....")];
+        log = log || [];
+        log = _.filter(log, (a) => { return a.machineId == LabEntranceMachineID; });
+        if (this.state.filterUserSelected)
+            log = _.filter(log, (a) => { return a.user == this.state.filterUserSelected; });
+        let userOptions = _.map(this.state.userList, (a) => { return (React.createElement("option", { value: a }, a)); });
+        userOptions = [React.createElement("option", { value: "" }, "All"), React.createElement("option", { value: "Unknown" }, "Unknown")].concat(userOptions);
+        let header = [
+            React.createElement("td", null,
+                React.createElement("b", null, "Date"),
+                " -",
+                React.createElement("select", { name: "filterDaySelected", value: this.state.filterDaySelected, onChange: this.handleInputChange },
+                    React.createElement("option", { value: "7" }, "Last 7 Days"),
+                    React.createElement("option", { value: "30" }, "Last 30 Days"),
+                    React.createElement("option", { value: "60" }, "Last 60 Days"),
+                    React.createElement("option", { value: "90" }, "Last 90 Days"))),
+            React.createElement("td", null,
+                React.createElement("b", null, "User"),
+                " - ",
+                React.createElement("select", { name: "filterUserSelected", value: this.state.filterUserSelected, onChange: this.handleInputChange }, userOptions)),
+            React.createElement("td", null,
+                React.createElement("b", null, "RFID")),
+            React.createElement("td", null,
+                React.createElement("b", null, "Message"))
+        ];
+        queryLst = [React.createElement("tr", null,
+                " ",
+                header,
+                " ")];
+        _.forEach(log, (act) => {
+            queryLst.push(React.createElement("tr", null,
+                React.createElement("td", null, moment(act.timestamp).format('MM/DD/YYYY h:mm a')),
+                React.createElement("td", null, act.user),
+                React.createElement("td", null, act.rfid),
+                React.createElement("td", null, act.message)));
+        });
+        queryLst = [React.createElement("table", null,
+                " ",
+                queryLst,
+                " ")];
+        return queryLst;
+    }
+    renderDeviceLog(log) {
+        let queryLst = [React.createElement("span", null, "Loading or no activity log entries exist....")];
+        let durationTotal = 0;
+        log = log || [];
+        if (this.state.filterUserSelected)
+            log = _.filter(log, (a) => { return a.user == this.state.filterUserSelected; });
+        if (this.state.filterDeviceSelected) {
+            log = _.filter(log, (a) => { return a.machineId == this.state.filterDeviceSelected; });
+        }
+        else {
+            log = _.filter(log, (a) => { return a.machineId != LabEntranceMachineID; });
+        }
+        var nlog = [];
+        for (var i = 0; i < log.length; i++) {
+            if (log[i].message === 'disabled') {
+                if (i + 1 < log.length && log[i + 1].message === 'enabled') {
+                    if (log[i].rfid == log[i + 1].rfid) {
+                        var hours = Math.floor((moment(log[i].timestamp).diff(moment(log[i + 1].timestamp)) / 1000 / 60 / 60) * 100) / 100;
+                        durationTotal += hours;
+                        nlog.push({
+                            timestamp: moment(log[i + 1].timestamp).format('MM/DD/YYYY h:mm ') + ' to ' + moment(log[i].timestamp).format('h:mm a'),
+                            duration: hours + ' hrs',
+                            user: log[i + 1].user,
+                            rfid: log[i + 1].rfid,
+                            machineId: log[i + 1].machineId
+                        });
+                        log[i].duration = hours;
+                        i++;
+                        continue;
+                    }
+                }
+            }
+            nlog.push({
+                timestamp: moment(log[i].timestamp).format('MM/DD/YYYY h:mm a'),
+                user: log[i].user,
+                rfid: log[i].rfid,
+                machineId: log[i].machineId
+            });
+        }
+        let userOptions = _.map(this.state.userList, (a) => { return (React.createElement("option", { value: a }, a)); });
+        userOptions = [React.createElement("option", { value: "" }, "All"), React.createElement("option", { value: "Unknown" }, "Unknown")].concat(userOptions);
+        let deviceOptions = _.map(_.filter(this.state.deviceList, (a) => { a != LabEntranceMachineID; }), (a) => { return (React.createElement("option", { value: a }, a)); });
+        deviceOptions = [React.createElement("option", { value: "" }, "All")].concat(deviceOptions);
+        let header = [
+            React.createElement("td", null,
+                React.createElement("b", null, "Date"),
+                " -",
+                React.createElement("select", { name: "filterDaySelected", value: this.state.filterDaySelected, onChange: this.handleInputChange },
+                    React.createElement("option", { value: "7" }, "Last 7 Days"),
+                    React.createElement("option", { value: "30" }, "Last 30 Days"),
+                    React.createElement("option", { value: "60" }, "Last 60 Days"),
+                    React.createElement("option", { value: "90" }, "Last 90 Days"))),
+            React.createElement("td", null,
+                React.createElement("b", null,
+                    "Duration (hr) - ",
+                    durationTotal,
+                    " ")),
+            React.createElement("td", null,
+                React.createElement("b", null, "User"),
+                " - ",
+                React.createElement("select", { name: "filterUserSelected", value: this.state.filterUserSelected, onChange: this.handleInputChange }, userOptions)),
+            React.createElement("td", null,
+                React.createElement("b", null, "RFID")),
+            React.createElement("td", null,
+                React.createElement("b", null, "Device"),
+                " - ",
+                React.createElement("select", { name: "filterDeviceSelected", value: this.state.filterDeviceSelected, onChange: this.handleInputChange }, deviceOptions)),
+            React.createElement("td", null,
+                React.createElement("b", null, "Message"))
+        ];
+        queryLst = [React.createElement("tr", null,
+                " ",
+                header,
+                " ")];
+        _.forEach(nlog, (act) => {
+            queryLst.push(React.createElement("tr", null,
+                React.createElement("td", null, act.timestamp),
+                React.createElement("td", null, act.duration),
+                React.createElement("td", null, act.user),
+                React.createElement("td", null, act.rfid),
+                React.createElement("td", null, act.machineId),
+                React.createElement("td", null, act.message)));
+        });
+        queryLst = [React.createElement("table", null,
+                " ",
+                queryLst,
+                " ")];
+        return queryLst;
+    }
+    renderAccessList() {
+        let accLst = [React.createElement("span", null, "Loading or no users exist and you should upload some....")];
         if (this.state.accessList && this.state.accessList.length) {
             let header = [React.createElement("td", null,
                     React.createElement("b", null, "User")), React.createElement("td", null,
@@ -26796,57 +26946,30 @@ class Application extends React.Component {
                     accLst,
                     " ")];
         }
-        let queryLst = [React.createElement("h3", null, "Loading or no activity log entries exist....")];
-        if (this.state.activityList && this.state.activityList.length) {
-            let header = [
-                React.createElement("td", null,
-                    React.createElement("b", null, "Date")),
-                React.createElement("td", null,
-                    React.createElement("b", null, "Type")),
-                React.createElement("td", null,
-                    React.createElement("b", null, "User")),
-                React.createElement("td", null,
-                    React.createElement("b", null, "RFID")),
-                React.createElement("td", null,
-                    React.createElement("b", null, "Machine")),
-                React.createElement("td", null,
-                    React.createElement("b", null, "Message"))
-            ];
-            queryLst = [React.createElement("tr", null,
-                    " ",
-                    header,
-                    " ")];
-            _.forEach(this.state.activityList, (act) => {
-                queryLst.push(React.createElement("tr", null,
-                    React.createElement("td", null, moment(act.timestamp).format('MM/DD, h:mm:ss a')),
-                    React.createElement("td", null, act.level),
-                    React.createElement("td", null, act.user),
-                    React.createElement("td", null, act.rfid),
-                    React.createElement("td", null, act.machineId),
-                    React.createElement("td", null, act.message)));
-            });
-            queryLst = [React.createElement("table", null,
-                    " ",
-                    queryLst,
-                    " ")];
-        }
+        return accLst;
+    }
+    render() {
+        let buildingLst = this.renderBuildingLog(this.state.activityList);
+        let deviceLst = this.renderDeviceLog(this.state.activityList);
+        let accLst = this.renderAccessList();
         return (React.createElement("div", null,
-            React.createElement("h1", null, "Durango MakerLab Device and Premise Access System"),
+            React.createElement("h1", null, "MakerLab Device and Premise Access System"),
             React.createElement(react_tabs_1.Tabs, null,
                 React.createElement(react_tabs_1.TabList, null,
-                    React.createElement(react_tabs_1.Tab, null, "Access Logs"),
-                    React.createElement(react_tabs_1.Tab, null, "User Access List"),
-                    React.createElement(react_tabs_1.Tab, null, "Device Status")),
-                React.createElement(react_tabs_1.TabPanel, null, queryLst),
+                    React.createElement(react_tabs_1.Tab, null, "Entry Logs"),
+                    React.createElement(react_tabs_1.Tab, null, "Device Logs"),
+                    React.createElement(react_tabs_1.Tab, null, "User Access List")),
+                React.createElement(react_tabs_1.TabPanel, null, buildingLst),
+                React.createElement(react_tabs_1.TabPanel, null, deviceLst),
                 React.createElement(react_tabs_1.TabPanel, null,
                     React.createElement("form", null,
-                        "Update the Access List by uploading a csv file with a column for the users Name, RFID, and a column for each device with a header row containing the device id.  For each device, an 'x' in the column indicates the user has access while any other value will not grant access.",
+                        "Update the Access List by uploading a csv file with a column for the users Name, RFID, and a column for each device with a header row containing the device id.  For each device, an 'x' in the column indicates the user has access while any other value will not grant access.  NOTE: The maker lab entrance lock column must be titled \"",
+                        LabEntranceMachineID,
+                        "\"",
                         this.state.accessUploadMsg,
                         ": ",
                         React.createElement("input", { style: { display: 'inline' }, type: "file", onChange: this.onChangeAccessList, ref: (r) => { this.fileInput = r; } })),
-                    accLst),
-                React.createElement(react_tabs_1.TabPanel, null,
-                    React.createElement("h3", null, "Todo, display a list of active devices based on the last request for the access-list...")))));
+                    accLst))));
     }
 }
 ReactDOM.render(React.createElement(Application, null), document.getElementById('react-app'));

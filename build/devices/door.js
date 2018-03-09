@@ -51,7 +51,7 @@ parser.on('data', function(data) {
         openTimer = setTimeout(() => { 
             openTimer=undefined;
             rpio.write(doorPin, 0); 
-        }, 5000);
+        }, 3500);
         
         //Open the door now
         rpio.write(doorPin, 1); 
