@@ -1,14 +1,32 @@
 [
    {
-      "name": "Agent Smith",
-      "rfid": "6F007F12C3C1",
+      "name": "Adam Roessler",
+      "rfid": "",
       "makerlab-entrance": "x",
-      "laser-cutter": ""
+      "laser-cutter": "",
+      "cnc router": "",
+      "cnc mill": "",
+      "3d printers": "",
+      "vinyl cutter": ""
    },
    {
-      "name": "Sarah Connor",
-      "rfid": "6F007F503A7A",
+      "name": "Angela Reali Crossland",
+      "rfid": "82003B719E56",
       "makerlab-entrance": "x",
-      "laser-cutter": "x"
+      "laser-cutter": "x",
+      "cnc router": "x",
+      "cnc mill": "",
+      "3d printers": "",
+      "vinyl cutter": "x"
+   },
+   {
+      "name": "Asa Shows",
+      "rfid": "82003B6BFC2E",
+      "makerlab-entrance": "x",
+      "laser-cutter": "",
+      "cnc router": "",
+      "cnc mill": "",
+      "3d printers": "",
+      "vinyl cutter": ""
    }
 ]

@@ -82,8 +82,18 @@ function setupAppServer(logger) {
         res.sendFile(path.join(__dirname + '/client/index.html'));
     });
 
+    //Device Up
+    app.get('/device-up-list', nocache, function (req, res) {
+        res.status(200).json(deviceUpList);
+    });
+
     //Access list get
-    app.get('/access-list', nocache, function (req, res) {
+    app.get('/access-list/:device?', nocache, function (req, res) {
+        //Note the device as being up if it has requested the updated access list
+        if (req.params.device) { device=req.params.device; }
+        deviceUpList[device] = new Date();
+
+        //Send out the list
         if (!fs.existsSync(path.join(__dirname + '/data/accesslist.json'))) {
             res.status(200).json([]);
         } else {
@@ -100,7 +110,10 @@ function setupAppServer(logger) {
             .on('json',(obj) => { 
                 //Normalize the properties to lower case
                 obj = _.transform(obj, function (result, val, key) {
-                    result[key.toLowerCase()] = val;
+                    //Ignore all columns that start with *
+                    if (!_.startsWith(key, "*")) {
+                        result[key.toLowerCase()] = val;
+                    }
                 });
                 newlist.push(obj); 
             })
@@ -142,5 +155,6 @@ function setupAppServer(logger) {
     console.log('Application server Listening');
 }
 
+var deviceUpList = {};
 var logger = setupLoggingServer();
 setupAppServer(logger);

@@ -10,6 +10,7 @@ const LabEntranceMachineID:string = "makerlab-entrance";
 class Application extends React.Component<any,any> {
 	private queryTimer:any;
 	private accessTimer:any;
+	private deviceUpTimer:any;
 	private fileInput:any;
 
 	constructor(props) {
@@ -19,6 +20,7 @@ class Application extends React.Component<any,any> {
 			accessUploadMsg: '',
 			accessList: [],
 			deviceList: [],
+			deviceUpList: {},
 			userList: [],
 			activityList: [],
 			filterDaySelected: 7,
@@ -99,17 +101,37 @@ class Application extends React.Component<any,any> {
 		});
 	}
 
+	getDeviceUpList() {
+		return fetch('/device-up-list').then((res) => {
+			if (res.status==200) {
+				res.json().then((data) => {
+					this.setState ({ 
+						deviceUpList: data || {}
+					});
+				});					
+			} else {
+				console.log('Error reading device-up-list: ' + res.toString());
+			}				
+			if (this.deviceUpTimer) clearTimeout(this.deviceUpTimer);
+			this.deviceUpTimer=setTimeout(this.getDeviceUpList.bind(this), 1000*60*1);
+		});		
+	}
+
 	componentDidMount() {
 		//Get the access list, do it every couple of minutes in case some other console updates it
 		this.getAccessList();
 		
 		//Start retrieving live log data
 		this.queryData(this.state.filterDaySelected);
+
+		//Start retrieving live machine status data
+		this.getDeviceUpList();
 	}
 
 	componentWillUnmount() {
 		if (this.queryTimer) clearTimeout(this.queryTimer);
 		if (this.accessTimer) clearTimeout(this.accessTimer);
+		if (this.deviceUpTimer) clearTimeout(this.deviceUpTimer);
 	}
 
 	handleInputChange(event) {
@@ -235,7 +257,7 @@ class Application extends React.Component<any,any> {
 					</select>
 			</td>, 
 			<td>
-				<b>Duration (hr) - { durationTotal } </b>
+				<b>Duration (hr) - { Math.floor(durationTotal*10.0)/10.0 } </b>
 			</td>, 
 			<td>
 				<b>User</b> - <select name="filterUserSelected" value={this.state.filterUserSelected} onChange={this.handleInputChange}>{ userOptions }</select>
@@ -287,9 +309,31 @@ class Application extends React.Component<any,any> {
 		return accLst;
 	}
 
+	renderDeviceUpList() {
+		//Setup the access list tab
+		let header=[<td><b>Machine ID</b></td>, <td><b>Last Checkin</b></td>];
+		let accLst=[<tr> { header } </tr>];
+		_.forOwn(this.state.deviceUpList, (val, key) => {				
+			var cols = [], css:any={};
+			if (moment(new Date()).diff(moment(val), 'minutes') > 5) {
+				css.color="red";
+			}
+			cols.push(<td>{ key }</td>);
+			cols.push(<td><span style={css}>{ moment(val).format('MM/DD/YYYY h:mm a') }</span></td>);
+			accLst.push(<tr>{cols}</tr>);
+		});
+		if (accLst.length==1) {
+			accLst = [<span>Loading or no device status information is available....</span>];
+		} else {
+			accLst = [<table> { accLst } </table>];
+		}
+		return accLst;
+	}
+
 	render() { 
 		let buildingLst = this.renderBuildingLog(this.state.activityList); 
 		let deviceLst = this.renderDeviceLog(this.state.activityList);
+		let deviceUpLst = this.renderDeviceUpList();
 		let accLst = this.renderAccessList();
 
 		return (
@@ -299,13 +343,17 @@ class Application extends React.Component<any,any> {
 					<TabList>
 						<Tab>Entry Logs</Tab>
 						<Tab>Device Logs</Tab>
-						<Tab>User Access List</Tab>
+						<Tab>Device Up Status</Tab>
+						<Tab>User List</Tab>
 					</TabList>
 					<TabPanel>
 						{ buildingLst }
 					</TabPanel>
 					<TabPanel>
 						{ deviceLst }
+					</TabPanel>
+					<TabPanel>
+						{ deviceUpLst }
 					</TabPanel>
 					<TabPanel>
 						<form>

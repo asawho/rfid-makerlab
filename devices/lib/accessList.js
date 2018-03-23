@@ -26,7 +26,7 @@ module.exports = class AccessList {
 
         //Start polling/storing updates
         var fn = () => {
-            request.get(this.serverURL).json()
+            request.get(this.serverURL + '/' + this.machineId).json()
                 .then((data) => {
                     this.list = data;
                     mkdirp.sync(path.dirname(this.cachedAccessListLocation));
