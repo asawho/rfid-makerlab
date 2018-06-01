@@ -52,7 +52,7 @@ module.exports = class AccessList {
         return ({            
             user: user ? _.clone(user) : undefined,
             rfid: rfid,
-            authorized: user ? user[this.machineId]=='x' : false
+            authorized: user && user.enabled=='x' && user[this.machineId]=='x'
         });
     }
 }

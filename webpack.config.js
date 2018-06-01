@@ -14,8 +14,8 @@ module.exports = {
   plugins: [
     new CopyWebpackPlugin([
       { from: './client/static' },
-      { from: './server/', to: '../' },
-      { from: './devices/', to: '../devices'}
+      { from: './server/', to: '../', ignore: 'config.js' },
+      { from: './devices/', to: '../devices', ignore: 'config.js'}
       //{ from: './server/pm2-server.json', to: '../' },
       //{ from: './server/data', to: '../data' }
     ])

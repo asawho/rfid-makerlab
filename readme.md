@@ -31,19 +31,19 @@ Note all the `sudo` above is because the harward interface library used requires
 ## Access List
 The access list defines the user, their rfid tag and the devices they have access to.  Typical workflow for the lab would be to maintain the membership, rfid access list in a google sheet.  This sheet can be saved to .csv when it is changed (File -> Download As -> Comma-separated values).  This csv would then be uploaded to the server.  The sheet will have the following columns, note the header names, Name and RFID are mandatory.  The remaining names should match the id set in the configuration file for the various devices.  An x in the column for a device indicates the user has access to that device.
 
-Name | RFID | makerlab-entrance | laser-cutter | *ignore | more-machines...
----- | ---- | ----------------- | ------------ | ------- | ----------------
-Agent Smith | 6F007F12C3C1 | x | x | ...
-Sarah Connor | 6F007F12C3C2 | x |  | ...
+Name | RFID | enabled | makerlab-entrance | laser-cutter | *ignore | more-machines...
+---- | ---- | ------- | ----------------- | ------------ | ------- | ----------------
+Agent Smith | x | 6F007F12C3C1 | x | x | ...
+Sarah Connor |  | 6F007F12C3C2 | x |  | ...
 ... | | | 
 
-In this example, both users have access to the building, but only Agent Smith has access to the laster-cutter.  Column names prefixed with an * are ignored.  All non mandatory columns and non device column names should start with an *.
+In this example, both users have access to the building, but only Agent Smith has access to the laster-cutter.  Column names prefixed with an * are ignored.  All non mandatory columns and non device column names should start with an *.  The enabled column turns on or off the RFID card access to all devices.  Enabled of value x means the user has access, any other value and the is prevented from using all devices.
 
 ### Reading New RFID Tags 
 Most cards won't have the RFID printed on them and even if they do its unlikely it is in the same format as the access list expects it.  So, when assigning a new card to someone, just go scan it on some device.  Then look in the logs and you will see a row with User 'Unknown' and the rfid tag.  Now you have it.
 
 ## Browser Client
-The browser client is available at http://192.168.1.14 where the IP address is the server's IP address.  The interface is very straightforward allowing you to view device usage and update the access list.  
+The browser client is available on port 80 of the server.  The interface is very straightforward allowing you to view device usage and update the access list.  
 
 ## Hardware
 The system is targetd at raspberry pi's and uses the `rpio` library to interface with it.  The server can be run concurrently with a device however multiple devices on the same pi will probably not work as is.  Since rpio uses the memory version of hardware access, right now you do need to run the devices with sudo.
@@ -51,9 +51,7 @@ The system is targetd at raspberry pi's and uses the `rpio` library to interface
 Both plug and door are targeted at the Pimoroni Automation phat.  This is not necessary, but was just easier than using a level shifter and separate relay for handling 5v for the plug and 12v for the door.
 
 ## Todo
-Put in filtering on the Access Logs page.
 Add in the Mail transport to email errors to staff.
-Implement the device status page and watchdog on the server to email when a device doesn't call home every so often.
 Put in log rotation so we don't fill up.
 
 ## Brand New Pi Notes

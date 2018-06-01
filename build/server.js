@@ -7,6 +7,7 @@ var winstond = require('winstond');
 var express = require('express');
 var fileUpload = require('express-fileupload');
 var bodyParser = require('body-parser');
+var basicAuth = require('express-basic-auth')
 var _ = require('lodash');
 var csvtojson = require('csvtojson');
 
@@ -72,6 +73,11 @@ function setupAppServer(logger) {
     var app = express();
 
     //Middleware -----------------------------------------------------
+    app.use(basicAuth({ 
+        users: cfg.users, 
+        challenge: true,
+        realm: 'wholesite' 
+    }));   //use basic auth, object is 'username' : 'password'
     app.use(bodyParser.json()); // support json encoded bodies
     app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
     app.use(fileUpload());
@@ -90,8 +96,10 @@ function setupAppServer(logger) {
     //Access list get
     app.get('/access-list/:device?', nocache, function (req, res) {
         //Note the device as being up if it has requested the updated access list
-        if (req.params.device) { device=req.params.device; }
-        deviceUpList[device] = new Date();
+        if (req.params.device) { 
+            device=req.params.device; 
+            deviceUpList[device] = new Date();
+        }
 
         //Send out the list
         if (!fs.existsSync(path.join(__dirname + '/data/accesslist.json'))) {

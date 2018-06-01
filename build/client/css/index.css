@@ -11,3 +11,7 @@ table td {
     padding-right: 1em;
     padding-bottom: 0.25em;
 }
+
+.disabled-user {
+    background-color: #f0a0a0
+}

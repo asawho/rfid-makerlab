@@ -37,6 +37,7 @@ class Application extends React.Component<any,any> {
 		this.setState({ accessUploadMsg : '(Updating...)' });
 		formData.append('accesslist', e.target.files[0]);
 		fetch('/access-list', {
+			credentials: 'include',
 			method: 'POST',
   			body: formData
 		}).then((res) => {
@@ -53,14 +54,14 @@ class Application extends React.Component<any,any> {
 	}
 
 	getAccessList() {
-		return fetch('/access-list').then((res) => {
+		return fetch('/access-list', {credentials: 'include'}).then((res) => {
 			if (res.status==200) {
 				res.json().then((data) => {
 					//Withdraw a set of unique devices
 					var deviceList=[];
 					if (data && data.length) {
 						for (var prop in data[0]) {
-							if (prop!='name' && prop!='rfid') {
+							if (prop!='enabled' && prop!='name' && prop!='rfid') {
 								deviceList.push(prop);
 							}
 						}	
@@ -87,7 +88,7 @@ class Application extends React.Component<any,any> {
 
 	queryData(days?:number) {
 		//Live data
-		return fetch('/query' + (days ? '/' + days : '')).then((res) => {
+		return fetch('/query' + (days ? '/' + days : ''), {credentials: 'include'}).then((res) => {
 			if (res.status==200) {
 				res.json().then((data) => {
 					this.setState ({ activityList: data });
@@ -102,7 +103,7 @@ class Application extends React.Component<any,any> {
 	}
 
 	getDeviceUpList() {
-		return fetch('/device-up-list').then((res) => {
+		return fetch('/device-up-list', {credentials: 'include'}).then((res) => {
 			if (res.status==200) {
 				res.json().then((data) => {
 					this.setState ({ 
@@ -289,7 +290,7 @@ class Application extends React.Component<any,any> {
 		//Setup the access list tab
 		let accLst = [<span>Loading or no users exist and you should upload some....</span>];
 		if (this.state.accessList && this.state.accessList.length) {
-			let header=[<td><b>User</b></td>, <td><b>RFID Tag</b></td>];
+			let header=[<td><b>User</b></td>, <td><b>RFID Tag</b></td>, <td><b>Enabled</b></td>];
 			_.forEach(this.state.deviceList, (name) => {
 				header.push(<td><b>{ name }</b></td>);
 			});
@@ -298,10 +299,11 @@ class Application extends React.Component<any,any> {
 				var cols = [];
 				cols.push(<td>{ user.name }</td>);
 				cols.push(<td>{ user.rfid }</td>);
+				cols.push(<td>{ user.enabled }</td>);
 				_.forEach(this.state.deviceList, (name) => {
 					cols.push(<td>{ user[name] }</td>);
 				});
-				accLst.push(<tr>{cols}</tr>);
+				accLst.push(<tr className={user.enabled ? "" : "disabled-user"} >{cols}</tr>);
 			});
 
 			accLst = [<table> { accLst } </table>];
