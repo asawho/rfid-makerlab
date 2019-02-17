@@ -1,9 +1,9 @@
 #Skip all the client specific configs
-build/config.js
-build/data/*
-build/devices/config.js
+build/server/data/*
 build/devices/data/*
-build/devices/pm2-device.json
+
+#Debug source maps
+*.map
 
 # Logs
 logs

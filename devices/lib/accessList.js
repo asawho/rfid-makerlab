@@ -6,7 +6,7 @@ var request = require('request-promise-native');
 
 module.exports = class AccessList {
     constructor (machineId, cachedAccessListLocation, serverURL, pollInterval, logger) {
-        this.machineId = machineId;
+        this.machineId = machineId.toLowerCase();
         this.serverURL = serverURL;
         this.cachedAccessListLocation = cachedAccessListLocation;
         this.pollInterval = pollInterval;
@@ -26,7 +26,7 @@ module.exports = class AccessList {
 
         //Start polling/storing updates
         var fn = () => {
-            request.get(this.serverURL + '/' + this.machineId).json()
+            request.get(this.serverURL + '/' + this.machineId).auth('admin','password').json()
                 .then((data) => {
                     this.list = data;
                     mkdirp.sync(path.dirname(this.cachedAccessListLocation));
@@ -43,12 +43,13 @@ module.exports = class AccessList {
     }
 
     //Returns { user: user, rfid: rfid, authorized: boolean } or undefined if no match
-    authorize(rawrfid) {
-        //Clean it up, for some reason all rfid's after 2nd have an invisible first character
-        var rfid = (rawrfid || "").replace(/[\n\r\s ]/g, "").substring(1);
-        if (rfid.length>12) { rfid = rfid.substring(1); }    
-
-        var user = _.find(this.list, (a) => a.rfid == rfid);
+    authorize(rfid) {  
+        //Phidget returns only 10bytes while ID12LA returns 12bytes, but the first 10bytes returned by 
+        //ID12LA match the 10bytes returned by phidget.  So, only concern ourselves with the first 10 bytes.
+        //Also since this is what gets logged, likely that only 10 bytes will be pasted into user list,
+        //but just to be sure, upper that and substring it
+        rfid=(rfid || "").substring(0,10).toUpperCase();
+        var user = rfid ? _.find(this.list, (a) => (a.rfid || "").substring(0,10).toUpperCase() == rfid) : undefined;
         return ({            
             user: user ? _.clone(user) : undefined,
             rfid: rfid,

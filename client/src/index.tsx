@@ -244,7 +244,7 @@ class Application extends React.Component<any,any> {
 
 		let userOptions = _.map(this.state.userList, (a:string) => { return (<option value={a}>{a}</option>); });
 		userOptions=[<option value="">All</option>, <option value="Unknown">Unknown</option>].concat(userOptions);
-		let deviceOptions = _.map(_.filter(this.state.deviceList, (a) => { a!=LabEntranceMachineID }), (a:string) => { return (<option value={a}>{a}</option>); });
+		let deviceOptions = _.map(_.filter(this.state.deviceList, (a:string):boolean => { return(a!=LabEntranceMachineID); }), (a:string) => { return (<option value={a}>{a}</option>); });
 		deviceOptions=[<option value="">All</option>].concat(deviceOptions);
 
 		let header=[
@@ -359,7 +359,7 @@ class Application extends React.Component<any,any> {
 					</TabPanel>
 					<TabPanel>
 						<form>
-							Update the Access List by uploading a csv file with a column for the users Name, RFID, and a column for each device with a header row containing the device id.  For each device, an 'x' in the column indicates the user has access while any other value will not grant access.  NOTE: The maker lab entrance lock column must be titled "{LabEntranceMachineID}"
+							Update the Access List by uploading a csv file with a column for the users Name, RFID, and a column for each device with a header row containing the device id.  For each device, an 'x' in the column indicates the user has access while any other value will not grant access.  A user is highlighted red when that user is not Enabled typically meaning they do not have a current membership.  NOTE: The maker lab entrance lock column must be titled "{LabEntranceMachineID}"
 							{ this.state.accessUploadMsg }: <input style={{ display:'inline' }} type="file" onChange={this.onChangeAccessList} ref = { (r) => { this.fileInput = r; } }/> 
 						</form> 
 						{ accLst }
