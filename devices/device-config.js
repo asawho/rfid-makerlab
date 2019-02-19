@@ -1,8 +1,8 @@
 module.exports = {
-    serverHost: 'localhost',                            //Server host name
+    serverHost: 'dolgudur',                            //Server host name
     serverPort: 80,                                     //Server port
     serverLogPath: '/collect',                          //Path to post logs to http winston transport
-    accessListServer: 'http://localhost/access-list',   //Path to poll for the access sheet
+    accessListServer: 'http://dolgudur/access-list',   //Path to poll for the access sheet
     accessListPollInterval: 1000*60,                    //How frequently to poll
 
     serverBasicAuthUser: 'admin',

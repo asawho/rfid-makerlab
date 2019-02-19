@@ -26,12 +26,12 @@ var logger = winston.createLogger({
 });    
 
 // Start polling the server for authorization updates
-var accessList = new AccessList(hostName, __dirname + '/data/accesslist.json', cfg.accessListServer, cfg.accessListPollInterval, logger);
+var accessList = new AccessList(hostName, __dirname + '/data/accesslist.json', cfg, logger);
 
 //Setup the device
 var device;
 var devcfg = _.find(cfg.devices, (q) => q.hostName == hostName);
-if (!devcfg) {
+if (devcfg) {
     if (devcfg.deviceType=='DoorID12LA') {
         device = new DoorID12LA(hostName, accessList, logger);
     }

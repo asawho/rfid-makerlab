@@ -18,10 +18,10 @@ var logger = winston.createLogger({
         new winston.transports.Console()
     ]
 });
-var accessList = new AccessList(hostName, __dirname + '/data/accesslist.json', cfg.accessListServer, cfg.accessListPollInterval, logger);
+var accessList = new AccessList(hostName, __dirname + '/data/accesslist.json', cfg, logger);
 var device;
 var devcfg = _.find(cfg.devices, (q) => q.hostName == hostName);
-if (!devcfg) {
+if (devcfg) {
     if (devcfg.deviceType == 'DoorID12LA') {
         device = new DoorID12LA(hostName, accessList, logger);
     }

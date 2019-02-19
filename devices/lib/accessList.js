@@ -5,20 +5,22 @@ var _ = require('lodash');
 var request = require('request-promise-native');
 
 module.exports = class AccessList {
-    constructor (machineId, cachedAccessListLocation, serverURL, pollInterval, logger) {
+    constructor (machineId, cachedAccessListLocation, cfg, logger) {        
         this.machineId = machineId.toLowerCase();
-        this.serverURL = serverURL;
+        this.serverURL = cfg.accessListServer;
         this.cachedAccessListLocation = cachedAccessListLocation;
-        this.pollInterval = pollInterval;
+        this.pollInterval = cfg.accessListPollInterval;
         this.logger = logger;
         this.list = [];
+        this.authUser = cfg.serverBasicAuthUser;
+        this.authPassword = cfg.serverBasicAuthPassword;
 
         this.startPolling();
     }
 
     startPolling() {
         //Read the tags initially
-        if (fs.exists(this.cachedAccessListLocation)) {
+        if (fs.existsSync(this.cachedAccessListLocation)) {
             this.list = JSON.parse(fs.readFileSync(this.cachedAccessListLocation));
         } else {
             this.list = [];
@@ -26,7 +28,7 @@ module.exports = class AccessList {
 
         //Start polling/storing updates
         var fn = () => {
-            request.get(this.serverURL + '/' + this.machineId).auth('admin','password').json()
+            request.get(this.serverURL + '/' + this.machineId).auth(this.authUser, this.authPassword).json()
                 .then((data) => {
                     this.list = data;
                     mkdirp.sync(path.dirname(this.cachedAccessListLocation));
