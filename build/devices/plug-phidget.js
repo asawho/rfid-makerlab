@@ -8,16 +8,16 @@ module.exports = class PlugPhidget {
         this.logger = logger;
         this.blnPlugOn = false;
         this.plugUser = undefined;
-        this.plugPin = 32;
+        this.plugPin = 11;
         this.phidgetConnection = undefined;
         this.SERVER_PORT = 5661;
         this.SERVER_HOST = 'localhost';
     }
     destroy() {
+        rpio.write(this.plugPin, 0);
         if (this.phidgetConnection) {
             this.phidgetConnection.close();
         }
-        rpio.write(this.plugPin, 0);
         this.blnPlugOn = false;
         this.plugUser = undefined;
     }

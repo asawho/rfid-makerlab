@@ -10,7 +10,7 @@ module.exports = class PlugPhidget {
 
         this.blnPlugOn = false;
         this.plugUser = undefined;
-        this.plugPin = 32;              //Physical
+        this.plugPin = 11;              //Physical
 
         this.phidgetConnection = undefined;
         this.SERVER_PORT = 5661;
@@ -18,11 +18,11 @@ module.exports = class PlugPhidget {
     }
 
     destroy() {
+        rpio.write(this.plugPin, 0);    
         //Disconnect and turn off
         if (this.phidgetConnection) {
             this.phidgetConnection.close();
         }
-        rpio.write(this.plugPin, 0);    
         this.blnPlugOn = false;
         this.plugUser = undefined;
     }

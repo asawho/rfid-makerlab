@@ -55,3 +55,11 @@ else {
     console.log('No device configuration found in device-config.js for host: '+hostName);
 }
 
+function fnExit() {
+    if (device) {
+        device.destroy();
+    }
+}
+process.on('exit', fnExit);
+process.on('SIGINT', fnExit);
+process.on('uncaughtException', fnExit);
