@@ -20,16 +20,17 @@ REMOTE=$(git rev-parse @{u});
 if [ $LOCAL != $REMOTE ]; then
     echo "Code updated"
     # update to the changes
+    git reset --hard origin/master;
     git pull origin master;
     # pull any new dependencies, don't rebuild as the built copy is checked in
     npm install
     #restart
-    if systemctl is-active --quiet rfid-server > 0
+    if systemctl is-active --quiet rfid-server 
     then
         echo "Restarting Server"
         sudo systemctl restart rfid-server
     fi
-    if systemctl is-active --quiet rfid-device > 0
+    if systemctl is-active --quiet rfid-device 
     then
         echo "Restarting Device"
         sudo systemctl restart rfid-device
