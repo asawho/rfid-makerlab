@@ -5,7 +5,7 @@ import * as moment from 'moment';
 
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 
-const LabEntranceMachineID:string = "makerlab-entrance";
+const LabEntranceMachineID:string = "rfentrance";
 
 class Application extends React.Component<any,any> {
 	private queryTimer:any;
