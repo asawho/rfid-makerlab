@@ -23,7 +23,7 @@ if [ $LOCAL != $REMOTE ]; then
     git reset --hard origin/master;
     git pull origin master;
     # pull any new dependencies, don't rebuild as the built copy is checked in
-    npm install
+    #npm install
     #restart
     if systemctl is-active --quiet rfid-server 
     then
