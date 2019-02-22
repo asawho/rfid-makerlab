@@ -1,8 +1,8 @@
 module.exports = {
-    serverHost: 'dolgudur',
+    serverHost: 'dolgudur.local',
     serverPort: 80,
     serverLogPath: '/collect',
-    accessListServer: 'http://dolgudur/access-list',
+    accessListServer: 'http://dolgudur.local/access-list',
     accessListPollInterval: 1000 * 60,
     serverBasicAuthUser: 'admin',
     serverBasicAuthPassword: 'password',

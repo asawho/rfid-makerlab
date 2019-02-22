@@ -1,6 +1,7 @@
 #sudo cp systemd/rfid-phidgetnetworkserver.service /etc/systemd/system
 #sudo systemctl daemon-reload
-#shouldn't need to enable/start this one as it will be started by the rfid script
+#sudo systemctl enable rfid-phidget22networkserver
+#sudo systemctl start rfid-phidget22networkserver 
 
 [Unit]
 Description=RFID Phidget Network Server - Needed for javascript to talk to the phidget
@@ -9,7 +10,7 @@ After=network.target
 [Service]
 User=root
 WorkingDirectory=/home/pi
-ExecStart=phidget22networkserver
+ExecStart=/usr/bin/phidget22networkserver
 Restart=always
 RestartSec=5
 StartLimitInterval=0

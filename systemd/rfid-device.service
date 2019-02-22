@@ -6,7 +6,7 @@
 [Unit]
 Description=RFID Device Listener
 After=network.target
-Wants=rfid-phidgetnetworkserver
+#Wants=rfid-phidgetnetworkserver <-- doesn't work so sometimes you get an error when phidget starts afterwards, but then it retries and works
 
 [Service]
 User=pi
