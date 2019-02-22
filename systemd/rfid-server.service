@@ -1,0 +1,19 @@
+#sudo cp systemd/rfid-server.service /etc/systemd/system
+#sudo systemctl daemon-reload
+#sudo systemctl enable rfid-server
+#sudo systemctl start rfid-server
+
+[Unit]
+Description=RFID Web Server
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/home/pi/rfid-makerlab/build/
+ExecStart=/usr/bin/node server/server.js
+Restart=always
+RestartSec=5
+StartLimitInterval=0
+
+[Install]
+WantedBy=multi-user.target

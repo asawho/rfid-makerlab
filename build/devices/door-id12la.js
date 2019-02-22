@@ -28,10 +28,7 @@ module.exports = class PlugID12LA {
         var parser = new SerialPort.parsers.Readline('\n');
         port.pipe(parser);
         parser.on('data', (data) => {
-            data = (data || "").replace(/[\n\r\s ]/g, "").substring(1);
-            if (data.length > 12) {
-                data = data.substring(1);
-            }
+            data = this.accessList.normalize(data, 'ID12LA');
             var access = this.accessList.authorize(data);
             if (!access.authorized) {
                 logger.info({ machineId: this.machineId, user: access.user ? access.user.name : 'Unknown', rfid: access.rfid, message: 'denied' });

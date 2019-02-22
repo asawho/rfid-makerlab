@@ -44,18 +44,32 @@ module.exports = class AccessList {
         fn(); 
     }
 
-    //Returns { user: user, rfid: rfid, authorized: boolean } or undefined if no match
-    authorize(rfid) {  
+    normalize(rfid, readerType) {
+        if (readerType=='ID12LA') {
+            //ID-12LA readers only, clean it up, for some reason all rfid's after 2nd have an invisible first character
+            rfid = (rfid || "").replace(/[\n\r\s ]/g, "").substring(1);
+            if (rfid.length>12) { rfid = rfid.substring(1); }
+        } 
+
         //Phidget returns only 10bytes while ID12LA returns 12bytes, but the first 10bytes returned by 
         //ID12LA match the 10bytes returned by phidget.  So, only concern ourselves with the first 10 bytes.
         //Also since this is what gets logged, likely that only 10 bytes will be pasted into user list,
         //but just to be sure, upper that and substring it
-        rfid=(rfid || "").substring(0,10).toUpperCase();
+        return ((rfid || "").substring(0,10).toUpperCase());
+    }
+
+    //Returns { user: user, rfid: rfid, authorized: boolean } or undefined if no match
+    authorize(rfid) {  
+        //Phidget returns only 10bytes while ID12LA returns 12bytes, but the first 10bytes returned by 
+        //ID12LA match the 10bytes returned by phidget.  Old access log had 12 byte numbers in it though
         var user = rfid ? _.find(this.list, (a) => (a.rfid || "").substring(0,10).toUpperCase() == rfid) : undefined;
+        user = user ? _.clone(user) : undefined;
+        //Clean up any legacy rfid's in the access list before we pass them back out
+        if (user) { user.rfid = this.normalize(user.rfid); }
         return ({            
-            user: user ? _.clone(user) : undefined,
+            user: user,
             rfid: rfid,
-            authorized: user && user.enabled=='x' && user[this.machineId]=='x'
+            authorized: user && (user.enabled=='x' || (user.enabled || '').toLowerCase()=='true')  && (user[this.machineId]=='x' || (user[this.machineId] || "").toLowerCase()=='true')
         });
     }
 }

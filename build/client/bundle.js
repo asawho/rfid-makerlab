@@ -297,7 +297,8 @@ class Application extends React.Component {
                             duration: hours + ' hrs',
                             user: log[i + 1].user,
                             rfid: log[i + 1].rfid,
-                            machineId: log[i + 1].machineId
+                            machineId: log[i + 1].machineId,
+                            message: 'enable/disable pair'
                         });
                         log[i].duration = hours;
                         i++;
@@ -309,7 +310,8 @@ class Application extends React.Component {
                 timestamp: moment(log[i].timestamp).format('MM/DD/YYYY h:mm a'),
                 user: log[i].user,
                 rfid: log[i].rfid,
-                machineId: log[i].machineId
+                machineId: log[i].machineId,
+                message: log[i].message
             });
         }
         let userOptions = _.map(this.state.userList, (a) => { return (React.createElement("option", { value: a }, a)); });
@@ -441,7 +443,7 @@ class Application extends React.Component {
                 React.createElement(react_tabs_1.TabPanel, null, deviceUpLst),
                 React.createElement(react_tabs_1.TabPanel, null,
                     React.createElement("form", null,
-                        "Update the Access List by uploading a csv file with a column for the users Name, RFID, and a column for each device with a header row containing the device id.  For each device, an 'x' in the column indicates the user has access while any other value will not grant access.  NOTE: The maker lab entrance lock column must be titled \"",
+                        "Update the Access List by uploading a csv file with a column for the users Name, RFID, and a column for each device with a header row containing the device id.  For each device, an 'x' in the column indicates the user has access while any other value will not grant access.  A user is highlighted red when that user is not Enabled typically meaning they do not have a current membership.  NOTE: The maker lab entrance lock column must be titled \"",
                         LabEntranceMachineID,
                         "\"",
                         this.state.accessUploadMsg,

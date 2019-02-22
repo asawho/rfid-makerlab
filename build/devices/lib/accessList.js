@@ -36,13 +36,25 @@ module.exports = class AccessList {
         };
         fn();
     }
+    normalize(rfid, readerType) {
+        if (readerType == 'ID12LA') {
+            rfid = (rfid || "").replace(/[\n\r\s ]/g, "").substring(1);
+            if (rfid.length > 12) {
+                rfid = rfid.substring(1);
+            }
+        }
+        return ((rfid || "").substring(0, 10).toUpperCase());
+    }
     authorize(rfid) {
-        rfid = (rfid || "").substring(0, 10).toUpperCase();
         var user = rfid ? _.find(this.list, (a) => (a.rfid || "").substring(0, 10).toUpperCase() == rfid) : undefined;
+        user = user ? _.clone(user) : undefined;
+        if (user) {
+            user.rfid = this.normalize(user.rfid);
+        }
         return ({
-            user: user ? _.clone(user) : undefined,
+            user: user,
             rfid: rfid,
-            authorized: user && user.enabled == 'x' && user[this.machineId] == 'x'
+            authorized: user && (user.enabled == 'x' || (user.enabled || '').toLowerCase() == 'true') && (user[this.machineId] == 'x' || (user[this.machineId] || "").toLowerCase() == 'true')
         });
     }
 };

@@ -52,16 +52,15 @@ module.exports = class PlugPhidget {
                             protocolStr = 'PHIDGET_TAG';
                             break;
                     }
-
-                    console.log('Tag: ' + tag + "\tProtocol: " + protocolStr);
-                    
+                    //console.log('Tag: ' + tag + "\tProtocol: " + protocolStr);
+                    tag = this.accessList.normalize(tag);                    
                     var access = this.accessList.authorize(tag);
                     if (!access.authorized) {
-                        console.log('Denied');
+                        //console.log('Denied');
                         this.logger.info({ machineId : this.machineId, user: access.user ? access.user.name : 'Unknown', rfid: access.rfid, message: 'denied' });
                     } 
                     else {
-                        console.log('Plug On');
+                        //console.log('Plug On');
                         this.logger.info({ machineId : this.machineId, user: access.user.name, rfid: access.rfid, message: 'enabled' });
                         rpio.write(this.plugPin, 1); 
                         this.blnPlugOn=true;                   
@@ -69,8 +68,9 @@ module.exports = class PlugPhidget {
                     }
                 };    
                 ch.onTagLost = (tag, protocol) => {
-                    console.log('TagLost: ' + tag);
-                    console.log('Plug Off');
+                    //console.log('TagLost: ' + tag);
+                    //console.log('Plug Off');
+                    tag = this.accessList.normalize(tag);
                     if (this.blnPlugOn) {
                         this.logger.info({ machineId : this.machineId, user: this.plugUser.name, rfid: this.plugUser.rfid, message: 'disabled' });
                         rpio.write(this.plugPin, 0);    

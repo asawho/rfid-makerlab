@@ -14,8 +14,7 @@ var logger = winston.createLogger({
     format: winston.format.json(),
     transports: [
         new winston.transports.File({ filename: __dirname + '/data/error.log', level: 'error' }),
-        new winston.transports.Http({ host: cfg.serverHost, port: cfg.serverPort, path: cfg.serverLogPath, auth: { username: 'admin', password: 'password' } }),
-        new winston.transports.Console()
+        new winston.transports.Http({ host: cfg.serverHost, port: cfg.serverPort, path: cfg.serverLogPath, auth: { username: cfg.serverBasicAuthUser, password: cfg.serverBasicAuthPassword } })
     ]
 });
 var accessList = new AccessList(hostName, __dirname + '/data/accesslist.json', cfg, logger);
@@ -48,6 +47,7 @@ function fnExit() {
     if (device) {
         device.destroy();
     }
+    process.exit();
 }
 process.on('exit', fnExit);
 process.on('SIGINT', fnExit);

@@ -15,8 +15,7 @@ function setupLoggingServer() {
         format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
         transports: [
             new winston.transports.File({ filename: __dirname + '/data/error.log', level: 'error' }),
-            new winston.transports.File({ filename: __dirname + '/data/activity.log' }),
-            new winston.transports.Console()
+            new winston.transports.File({ filename: __dirname + '/data/activity.log' })
         ]
     });
     let fn = () => {

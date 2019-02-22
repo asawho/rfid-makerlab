@@ -20,8 +20,8 @@ var logger = winston.createLogger({
     format: winston.format.json(),
     transports: [
         new winston.transports.File({ filename: __dirname + '/data/error.log', level: 'error' }),      
-        new winston.transports.Http({ host: cfg.serverHost, port: cfg.serverPort, path: cfg.serverLogPath, auth: { username: 'admin', password: 'password'} }),
-        new winston.transports.Console()  //Debug for now
+        new winston.transports.Http({ host: cfg.serverHost, port: cfg.serverPort, path: cfg.serverLogPath, auth: { username: cfg.serverBasicAuthUser, password: cfg.serverBasicAuthPassword } })
+        //new winston.transports.Console()  //Debug for now
     ]        
 });    
 
@@ -55,10 +55,12 @@ else {
     console.log('No device configuration found in device-config.js for host: '+hostName);
 }
 
+//Sort of works
 function fnExit() {
     if (device) {
         device.destroy();
     }
+    process.exit();
 }
 process.on('exit', fnExit);
 process.on('SIGINT', fnExit);

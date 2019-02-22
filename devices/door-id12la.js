@@ -36,10 +36,8 @@ module.exports = class PlugID12LA {
 
         port.pipe(parser);
         parser.on('data', (data) => {
-            //ID-12LA readers only, clean it up, for some reason all rfid's after 2nd have an invisible first character
-            data = (data || "").replace(/[\n\r\s ]/g, "").substring(1);
-            if (data.length>12) { data = data.substring(1); }
-
+            data = this.accessList.normalize(data, 'ID12LA');
+            
             //If the user is not authorized don't open the door
             var access = this.accessList.authorize(data);
             if (!access.authorized) {

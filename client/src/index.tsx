@@ -226,7 +226,8 @@ class Application extends React.Component<any,any> {
 							duration: hours + ' hrs',
 							user: log[i+1].user,
 							rfid: log[i+1].rfid,
-							machineId: log[i+1].machineId
+							machineId: log[i+1].machineId,
+							message: 'enable/disable pair'
 						});
 						log[i].duration = hours;
 						i++;
@@ -238,7 +239,8 @@ class Application extends React.Component<any,any> {
 				timestamp: moment(log[i].timestamp).format('MM/DD/YYYY h:mm a'),
 				user: log[i].user,
 				rfid: log[i].rfid,
-				machineId: log[i].machineId
+				machineId: log[i].machineId,
+				message: log[i].message
 			});
 		}
 

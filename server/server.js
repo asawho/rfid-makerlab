@@ -21,8 +21,8 @@ function setupLoggingServer() {
         //winston.format.json(),
         transports: [
           new winston.transports.File({ filename:  __dirname + '/data/error.log', level: 'error' }),
-          new winston.transports.File({ filename: __dirname + '/data/activity.log' }),
-          new winston.transports.Console()  //Debugging
+          new winston.transports.File({ filename: __dirname + '/data/activity.log' })
+          //new winston.transports.Console()  //Debugging
         ]        
     });    
     
@@ -81,7 +81,7 @@ function setupAppServer(logger) {
     });
 
     //Log route.  The package winstond used to provide this support.  It hasn't been updated in forever and
-    //was not working.  So, all the devices use winston http transport.  The just log stuff to the server using
+    //was not working.  So, all the devices use winston http transport.  They just log stuff to the server using
     //json rpc. So this path just accepts that log event and logs it to the local server.
     app.post('/collect', nocache, function (req, res) {
         logger.log(req.body.level, req.body);
