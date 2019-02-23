@@ -1,5 +1,5 @@
 module.exports = {
-    serverHost: 'rfserver',
+    serverHost: 'rfserver.local',
     serverPort: 80,
     serverLogPath: '/collect',
     accessListServer: 'http://rfserver.local/access-list',
