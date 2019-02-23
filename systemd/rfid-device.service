@@ -9,6 +9,8 @@ After=network.target
 #Wants=rfid-phidgetnetworkserver <-- doesn't work so sometimes you get an error when phidget starts afterwards, but then it retries and works
 
 [Service]
+Environment=BASIC_USER=admin
+Environment=BASIC_PASSWORD=password
 User=pi
 WorkingDirectory=/home/pi/rfid-makerlab/build/devices
 ExecStart=/usr/bin/node device-main.js

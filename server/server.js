@@ -1,4 +1,3 @@
-var cfg = require('./server-config');
 var path = require('path');
 var fs = require('fs');
 var mkdirp = require('mkdirp');
@@ -65,8 +64,10 @@ function setupAppServer(logger) {
     var app = express();
 
     //Middleware -----------------------------------------------------
+    users = {};
+    users[process.env.BASIC_USER || 'admin'] = process.env.BASIC_PASSWORD || 'password';
     app.use(basicAuth({ 
-        users: cfg.users, 
+        users: users, 
         challenge: true,
         realm: 'MakerLab' 
     }));   //use basic auth, object is 'username' : 'password'

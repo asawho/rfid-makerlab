@@ -101,7 +101,7 @@ const ReactDOM = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/
 const _ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 const moment = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
 const react_tabs_1 = __webpack_require__(/*! react-tabs */ "./node_modules/react-tabs/esm/index.js");
-const LabEntranceMachineID = "makerlab-entrance";
+const LabEntranceMachineID = "rfentrance";
 class Application extends React.Component {
     constructor(props) {
         super(props);

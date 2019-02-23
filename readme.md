@@ -8,7 +8,9 @@ The application server includes a logging endpoint for all the devices and an ht
 
 The server holds its data in the build/data folder.  This includes the access list and the logs from all devices.  These are just .json files and could be manually edited, viewed.  This is mentioned because overall this is very simple.  Where it gets more complex is when we introduce the browser client for viewing logs and updating the access list.  Strictly speaking it is not necessary, but for end user simplicity, it was added.
 
-The server and devices should be configured with network names following the Pi configuration steps.  The devices do not discover the server but rather need to be configured to point to it.  The default is for the server to be called rfid-server.  Meaning that the user interface can be reached at http://rfserver or http://rfserver.local (depending on windows or linux).  The default login is admin/password.
+The server and devices should be configured with network names following the Pi configuration steps.  The devices do not discover the server but rather need to be configured to point to it.  The default is for the server to be called rfid-server.  Meaning that the user interface can be reached at http://rfserver or http://rfserver.local (depending on windows or linux).  
+
+The server is setup with basic auth.  The devices need to know the password.  In both cases the username/password is looked for in the environment variables BASIC_USER and BASIC_PASSWORD.  If neither is set, it will default to 'admin'/'password'.  The environment variables are easily set in the systemd scripts and then are outside of the git pull refresh cycle so they can be set without commiting their values.
 
 ## Devices
 The devices will probably not be that varied or if they are they will be only subtle variations.  Right now there are two, one for a plug and one for the door located in the devices folder.  There are two versions of these one that supports the Phidget RFID 1024_0B and the other supports the ID12LA RFID Reader.  
@@ -133,6 +135,16 @@ And Test
 sudo reboot
 sudo ps -A | grep phidget   #Verify network server came up
 sudo iptables -L            #Verify firewall took
+```
+
+## Extra Special Sauce - Configuring Automatic Code Updates
+There are going to be a lot of these Pis running around.  In order to streamline the continued development, the Pi can be configured to poll github and automatically pull down any updates and then restart the services.  The included ./git-monitor.sh performs this.  Set this script up with cron to execute at a reasonable interval (for the example below it is every 5 minutes).  Note that updates to the systemd scripts and updates to the basic auth username and password cannot be made in this manner.  All other changes can. 
+```
+#Make the script executable
+chmod +x git-monitor.sh
+sudo crontab -e
+#Paste in
+*/5 * * * * /home/pi/rfid-makerlab/git-monitor.sh
 ```
 
 ## Todo

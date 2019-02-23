@@ -5,9 +5,6 @@ module.exports = {
     accessListServer: 'http://rfserver/access-list',   //Path to poll for the access sheet
     accessListPollInterval: 1000*60,                    //How frequently to poll
 
-    serverBasicAuthUser: 'admin',
-    serverBasicAuthPassword: 'password',
-
     devices : [
         {
             hostName: 'rfentrance',

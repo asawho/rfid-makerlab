@@ -14,7 +14,8 @@ var logger = winston.createLogger({
     format: winston.format.json(),
     transports: [
         new winston.transports.File({ filename: __dirname + '/data/error.log', level: 'error' }),
-        new winston.transports.Http({ host: cfg.serverHost, port: cfg.serverPort, path: cfg.serverLogPath, auth: { username: cfg.serverBasicAuthUser, password: cfg.serverBasicAuthPassword } })
+        new winston.transports.Http({ host: cfg.serverHost, port: cfg.serverPort, path: cfg.serverLogPath,
+            auth: { username: process.env.BASIC_USER || 'admin', password: process.env.BASIC_PASSWORD || 'password' } })
     ]
 });
 var accessList = new AccessList(hostName, __dirname + '/data/accesslist.json', cfg, logger);

@@ -19,11 +19,11 @@ REMOTE=$(git rev-parse @{u});
 #if our local revision id doesn't match the remote, we will need to pull the changes
 if [ $LOCAL != $REMOTE ]; then
     echo "Code updated"
-    # update to the changes
+    # update to the changes, reset because of npm-install and package lock
     git reset --hard origin/master;
     git pull origin master;
     # pull any new dependencies, don't rebuild as the built copy is checked in
-    #npm install
+    npm install
     #restart
     if systemctl is-active --quiet rfid-server 
     then

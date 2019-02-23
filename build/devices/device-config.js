@@ -1,29 +1,22 @@
 module.exports = {
-    serverHost: 'dolgudur.local',
+    serverHost: 'rfserver',
     serverPort: 80,
     serverLogPath: '/collect',
-    accessListServer: 'http://dolgudur.local/access-list',
+    accessListServer: 'http://rfserver/access-list',
     accessListPollInterval: 1000 * 60,
-    serverBasicAuthUser: 'admin',
-    serverBasicAuthPassword: 'password',
     devices: [
         {
-            hostName: 'rfid-entrance',
+            hostName: 'rfentrance',
             deviceType: 'DoorID12LA',
             options: {}
         },
         {
-            hostName: 'rfid-laser1',
-            deviceType: 'PlugPhidget',
-            options: {}
-        },
-        {
-            hostName: 'rfid-laser2',
+            hostName: 'rflaser1',
             deviceType: 'PlugID12LA',
             options: {}
         },
         {
-            hostName: 'dolgudur',
+            hostName: 'rflaser2',
             deviceType: 'PlugPhidget',
             options: {}
         }

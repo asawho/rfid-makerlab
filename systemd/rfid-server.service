@@ -8,6 +8,8 @@ Description=RFID Web Server
 After=network.target
 
 [Service]
+Environment=BASIC_USER=admin
+Environment=BASIC_PASSWORD=password
 User=root
 WorkingDirectory=/home/pi/rfid-makerlab/build/
 ExecStart=/usr/bin/node server/server.js
