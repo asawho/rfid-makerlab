@@ -11,8 +11,8 @@ module.exports = class AccessList {
         this.pollInterval = cfg.accessListPollInterval;
         this.logger = logger;
         this.list = [];
-        this.authUser = cfg.serverBasicAuthUser;
-        this.authPassword = cfg.serverBasicAuthPassword;
+        this.authUser = process.env.BASIC_USER || 'admin';
+        this.authPassword = process.env.BASIC_PASSWORD || 'password';
         this.startPolling();
     }
     startPolling() {
