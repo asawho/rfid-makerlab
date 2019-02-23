@@ -2,7 +2,7 @@ module.exports = {
     serverHost: 'rfserver',
     serverPort: 80,
     serverLogPath: '/collect',
-    accessListServer: 'http://rfserver/access-list',
+    accessListServer: 'http://rfserver.local/access-list',
     accessListPollInterval: 1000 * 60,
     devices: [
         {
