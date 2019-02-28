@@ -142,7 +142,8 @@ There are going to be a lot of these Pis running around.  In order to streamline
 ```
 #Make the script executable
 chmod +x git-monitor.sh
-sudo crontab -e
+#Run it as the pi user, he can sudo to start/stop/reboot and if you run as root the git pull confuses permissions
+crontab -e
 #Paste in
 */5 * * * * /home/pi/rfid-makerlab/git-monitor.sh
 ```
