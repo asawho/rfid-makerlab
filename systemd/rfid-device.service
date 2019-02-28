@@ -1,18 +1,22 @@
-#sudo cp systemd/rfid-device.service /etc/systemd/system
-#sudo systemctl daemon-reload
-#sudo systemctl enable rfid-device
-#sudo systemctl start rfid-device
+# sudo cp systemd/rfid-device.service /etc/systemd/system
+# sudo systemctl daemon-reload
+# sudo systemctl enable rfid-device
+# sudo systemctl start rfid-device
+# The 60s sleep is to give rfid-phidgetnetworkserver.service plenty plenty of time to start up.
+# in fact if you don't do this you get intermittent bugs.
 
 [Unit]
 Description=RFID Device Listener
 After=network.target
-#Wants=rfid-phidgetnetworkserver <-- doesn't work so sometimes you get an error when phidget starts afterwards, but then it retries and works
+After=rfid-phidgetnetworkserver.service
+Requires=rfid-phidgetnetworkserver.service
 
 [Service]
 Environment=BASIC_USER=admin
 Environment=BASIC_PASSWORD=password
 User=pi
 WorkingDirectory=/home/pi/rfid-makerlab/build/devices
+ExecStartPre=/bin/sleep 60s
 ExecStart=/usr/bin/node device-main.js
 Restart=always
 RestartSec=5

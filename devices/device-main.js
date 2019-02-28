@@ -56,13 +56,13 @@ else {
     console.log('No device configuration found in device-config.js for host: '+hostName);
 }
 
-//Sort of works
-function fnExit() {
-    if (device) {
-        device.destroy();
-    }
-    process.exit();
-}
-process.on('exit', fnExit);
-process.on('SIGINT', fnExit);
-process.on('uncaughtException', fnExit);
+//Had issues with systemctl start/stop, think it is related to catching this.  Really shouldn't matter
+// function fnExit() {
+//     if (device) {
+//         device.destroy();
+//     }
+//     process.exit();
+// }
+// process.on('exit', fnExit);
+// process.on('SIGINT', fnExit);
+// process.on('uncaughtException', fnExit);

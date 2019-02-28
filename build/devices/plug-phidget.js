@@ -30,6 +30,7 @@ module.exports = class PlugPhidget {
             .then(() => {
             console.log('Connected to Phidget Network Server');
             var ch = new phidget22.RFID();
+            ch.close();
             ch.onTag = (tag, protocol) => {
                 var protocolStr;
                 switch (protocol) {

@@ -39,6 +39,7 @@ module.exports = class PlugPhidget {
             .then(() => {
                 console.log('Connected to Phidget Network Server');
                 var ch = new phidget22.RFID();
+                ch.close();
                 ch.onTag = (tag, protocol) => {
                     var protocolStr;
                     switch (protocol) {
@@ -80,9 +81,9 @@ module.exports = class PlugPhidget {
 
                 return (ch.open(3000).then(function (ch) {
                     console.log('Connected to Phidget RFID');
+                    //console.log('Antenna On: ' + ch.getAntennaEnabled());
+                    //ch.setAntennaEnabled(true);
                 }));
             }));
     }
-
-    onTagLost
 }

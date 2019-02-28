@@ -32,8 +32,13 @@ if [ $LOCAL != $REMOTE ]; then
     fi
     if systemctl is-active --quiet rfid-device 
     then
-        echo "Restarting Device"
-        sudo systemctl restart rfid-device
+        # So... the phidget seems to have a bug where if you stop the node service or stop
+        # the network service and start them back up.  Half the time on the pi zero (and 1 out of
+        # 15 times on the Pi) it won't read any tags.  It'll do this during development too,
+        # but it is easy to deal with that.  So... anyway, coming all the way up fresh seems
+        # to avoid this.
+        echo "Rebooting"
+        sudo reboot
     fi
 else
     echo "No Updates"

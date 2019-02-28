@@ -44,13 +44,4 @@ if (devcfg) {
 else {
     console.log('No device configuration found in device-config.js for host: ' + hostName);
 }
-function fnExit() {
-    if (device) {
-        device.destroy();
-    }
-    process.exit();
-}
-process.on('exit', fnExit);
-process.on('SIGINT', fnExit);
-process.on('uncaughtException', fnExit);
 //# sourceMappingURL=device-main.js.map

@@ -20,6 +20,11 @@ module.exports = {
             hostName: 'rflaser2',
             deviceType: 'PlugPhidget',
             options: { }
+        },        
+        {
+            hostName: 'rfserver',
+            deviceType: 'PlugPhidget',
+            options: { }
         }
     ]
 }
