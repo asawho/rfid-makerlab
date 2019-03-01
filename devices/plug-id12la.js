@@ -38,7 +38,7 @@ module.exports = class PlugID12LA {
         rpio.open(this.ledPin, rpio.OUTPUT, rpio.LOW);
         rpio.open(this.plugPin, rpio.OUTPUT, rpio.LOW);
         rpio.open(this.optoPin, rpio.INPUT, rpio.PULL_OFF);
-
+        
         //Start the heartbeat pulse
         this.intervalTimer = setInterval(() => {
             if (!this.blnPlugOn) {
@@ -100,8 +100,5 @@ module.exports = class PlugID12LA {
                 }, 250);
             }
         });
-
-        //Setup returns a promise that may throw an error (but not in this case), so lets make one
-        new Promise(function(resolve, reject) { reslove(''); });
     }
 }

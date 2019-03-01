@@ -32,10 +32,13 @@ if (devcfg) {
         device = new PlugPhidget(hostName, accessList, logger);
     }
     if (device) {
-        device.setup().catch((err) => {
-            logger.error({ machineId: hostName, msg: 'Error during hardware setup:' + err.message });
-            process.exit(1);
-        });
+        var promise = device.setup();
+        if (promise) {
+            prmise.catch((err) => {
+                logger.error({ machineId: hostName, msg: 'Error during hardware setup:' + err.message });
+                process.exit(1);
+            });
+        }
     }
     else {
         console.log('Invalid device type: ' + devcfg.deviceType);

@@ -7,24 +7,24 @@ module.exports = {
 
     devices : [
         {
+            hostName: 'rfserver',
+            deviceType: 'PlugPhidget',
+            options: { }
+        },
+        {
             hostName: 'rfentrance',
             deviceType: 'DoorID12LA',
             options: { }
         },
         {
-            hostName: 'rflaser1',
+            hostName: 'rflaserchina',
             deviceType: 'PlugID12LA',
             options: { }
         },        
         {
-            hostName: 'rflaser2',
+            hostName: 'rflaserhurricane',
             deviceType: 'PlugPhidget',
             options: { }
-        },        
-        {
-            hostName: 'rfserver',
-            deviceType: 'PlugPhidget',
-            options: { }
-        }
+        }        
     ]
 }

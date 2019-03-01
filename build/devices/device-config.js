@@ -6,22 +6,22 @@ module.exports = {
     accessListPollInterval: 1000 * 60,
     devices: [
         {
+            hostName: 'rfserver',
+            deviceType: 'PlugPhidget',
+            options: {}
+        },
+        {
             hostName: 'rfentrance',
             deviceType: 'DoorID12LA',
             options: {}
         },
         {
-            hostName: 'rflaser1',
+            hostName: 'rflaserchina',
             deviceType: 'PlugID12LA',
             options: {}
         },
         {
-            hostName: 'rflaser2',
-            deviceType: 'PlugPhidget',
-            options: {}
-        },
-        {
-            hostName: 'rfserver',
+            hostName: 'rflaserhurricane',
             deviceType: 'PlugPhidget',
             options: {}
         }

@@ -72,7 +72,8 @@ git clone https://github.com/asawho/rfid-makerlab
 cat rfid-makerlab/build/devices/device-config.js
 
 #Setup the daemon for the device and or server
-sudo cp rfid-makerlab/systemd/rfid-device or rfid-server.service /etc/systemd/system
+sudo cp rfid-makerlab/systemd/rfid-device.service or rfid-server.service /etc/systemd/system
+#Edit the files in the /etc/systemd/system folder and update the password
 sudo systemctl daemon-reload
 sudo systemctl enable rfid-device or server
 sudo systemctl start rfid-device or server

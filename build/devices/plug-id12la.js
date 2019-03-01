@@ -84,7 +84,6 @@ module.exports = class PlugID12LA {
                 }, 250);
             }
         });
-        new Promise(function (resolve, reject) { reslove(''); });
     }
 };
 //# sourceMappingURL=plug-id12la.js.map
