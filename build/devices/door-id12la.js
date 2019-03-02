@@ -24,14 +24,14 @@ module.exports = class PlugID12LA {
     setup() {
         rpio.init({ gpiomem: true, mapping: 'physical' });
         rpio.open(this.doorPin, rpio.OUTPUT, rpio.LOW);
-        this.port = new SerialPort(this.rfidPort, { baudRate: 9600 });
+        this.serialport = new SerialPort(this.rfidPort, { baudRate: 9600 });
         var parser = new SerialPort.parsers.Readline('\n');
-        port.pipe(parser);
+        this.serialport.pipe(parser);
         parser.on('data', (data) => {
             data = this.accessList.normalize(data, 'ID12LA');
             var access = this.accessList.authorize(data);
             if (!access.authorized) {
-                logger.info({ machineId: this.machineId, user: access.user ? access.user.name : 'Unknown', rfid: access.rfid, message: 'denied' });
+                this.logger.info({ machineId: this.machineId, user: access.user ? access.user.name : 'Unknown', rfid: access.rfid, message: 'denied' });
             }
             else {
                 if (this.openTimer) {
@@ -42,7 +42,7 @@ module.exports = class PlugID12LA {
                     rpio.write(this.doorPin, 0);
                 }, 3500);
                 rpio.write(this.doorPin, 1);
-                logger.info({ machineId: this.machineId, user: access.user.name, rfid: access.rfid, message: 'unlocked' });
+                this.logger.info({ machineId: this.machineId, user: access.user.name, rfid: access.rfid, message: 'unlocked' });
             }
         });
     }

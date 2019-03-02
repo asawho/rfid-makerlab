@@ -31,17 +31,17 @@ module.exports = class PlugID12LA {
         rpio.open(this.doorPin, rpio.OUTPUT, rpio.LOW);  //Start locked
 
         //Start polling the RFID to watch for card scans
-        this.port = new SerialPort(this.rfidPort, { baudRate: 9600 });
+        this.serialport = new SerialPort(this.rfidPort, { baudRate: 9600 });
         var parser = new SerialPort.parsers.Readline('\n');
 
-        port.pipe(parser);
+        this.serialport.pipe(parser);
         parser.on('data', (data) => {
             data = this.accessList.normalize(data, 'ID12LA');
             
             //If the user is not authorized don't open the door
             var access = this.accessList.authorize(data);
             if (!access.authorized) {
-                logger.info({ machineId : this.machineId, user: access.user ? access.user.name : 'Unknown', rfid: access.rfid, message: 'denied' });
+                this.logger.info({ machineId : this.machineId, user: access.user ? access.user.name : 'Unknown', rfid: access.rfid, message: 'denied' });
             } 
             //Open the door
             else {
@@ -54,7 +54,7 @@ module.exports = class PlugID12LA {
                 
                 //Open the door now
                 rpio.write(this.doorPin, 1); 
-                logger.info({ machineId : this.machineId, user: access.user.name, rfid: access.rfid, message: 'unlocked' });
+                this.logger.info({ machineId : this.machineId, user: access.user.name, rfid: access.rfid, message: 'unlocked' });
             }
         });
     }
