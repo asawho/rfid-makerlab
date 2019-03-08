@@ -34,7 +34,7 @@ if (devcfg) {
     if (device) {
         var promise = device.setup();
         if (promise) {
-            prmise.catch((err) => {
+            promise.catch((err) => {
                 logger.error({ machineId: hostName, msg: 'Error during hardware setup:' + err.message });
                 process.exit(1);
             });

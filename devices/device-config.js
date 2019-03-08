@@ -25,6 +25,11 @@ module.exports = {
             hostName: 'rflaserhurricane',
             deviceType: 'PlugPhidget',
             options: { }
-        }        
+        },
+	{
+	    hostName: 'rfzortrax',
+	    deviceType: 'PlugPhidget',
+	    options: { }
+	}        
     ]
 }

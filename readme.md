@@ -109,7 +109,7 @@ tar -xvf *.gz
 # In each folder  (starting with lib and libextra), build the libs and put them in /usr/lib
 ./configure --prefix=/usr && make && sudo make install
 
-#Edit the network server config file and turn off the web server
+#Edit the network server config file and turn off the web server, set the log folder to /var/log/phidget22networkserver.log
 cp phidget22networkserver-version/phidget22networkserver.pc-dist /etc/phidgets/phidget22networkserver.pc
 sudo nano /etc/phidgets/phidget22networkserver.pc
 
