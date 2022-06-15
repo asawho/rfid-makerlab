@@ -66,6 +66,7 @@ function setupAppServer(logger) {
     //Middleware -----------------------------------------------------
     users = {};
     users[process.env.BASIC_USER || 'admin'] = process.env.BASIC_PASSWORD || 'password';
+    
     app.use(basicAuth({ 
         users: users, 
         challenge: true,
@@ -159,7 +160,7 @@ function setupAppServer(logger) {
         })            
     });
 
-    app.listen(80);
+    app.listen(3000);
     console.log('Application server Listening');
 }
 

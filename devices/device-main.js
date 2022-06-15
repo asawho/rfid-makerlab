@@ -7,6 +7,7 @@ var cfg = require('./device-config');
 var AccessList = require('./lib/accessList');
 
 var DoorID12LA = require('./door-id12la');
+var DoorID12LAWyzeLock = require('./door-id12la-wyze-lock');
 var PlugID12LA = require('./plug-id12la');
 var PlugPhidget = require('./plug-phidget');
 
@@ -36,7 +37,10 @@ if (devcfg) {
     if (devcfg.deviceType=='DoorID12LA') {
         device = new DoorID12LA(hostName, accessList, logger);
     }
-    if (devcfg.deviceType=='PlugID12LA') {
+    else if (devcfg.deviceType=='DoorID12LAWyzeLock') {
+        device = new DoorID12LAWyzeLock(hostName, accessList, logger, devcfg.options);
+    }
+    else if (devcfg.deviceType=='PlugID12LA') {
         device = new PlugID12LA(hostName, accessList, logger);
     }
     else if (devcfg.deviceType=='PlugPhidget') {

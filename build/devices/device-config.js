@@ -1,19 +1,19 @@
 module.exports = {
-    serverHost: 'rfserver.local',
-    serverPort: 80,
+    serverHost: 'rfentrance.local',
+    serverPort: 3000,
     serverLogPath: '/collect',
-    accessListServer: 'http://rfserver.local/access-list',
+    accessListServer: 'http://rfentrance.local:3000/access-list',
     accessListPollInterval: 1000 * 60,
     devices: [
         {
-            hostName: 'rfserver',
-            deviceType: 'PlugPhidget',
-            options: {}
-        },
-        {
             hostName: 'rfentrance',
-            deviceType: 'DoorID12LA',
-            options: {}
+            deviceType: 'DoorID12LAWyzeLock',
+            options: {
+                rfidPort: '/dev/ttyUSB0',
+                email: process.env.WYZELOCK_EMAIL,
+                password: process.env.WYZELOCK_PASSWORD,
+                mac: process.env.WYZELOCK_MAC
+            }
         },
         {
             hostName: 'rflaserchina',

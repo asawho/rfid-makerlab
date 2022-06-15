@@ -14,7 +14,6 @@ module.exports = class AccessList {
         this.list = [];
         this.authUser = process.env.BASIC_USER || 'admin';
         this.authPassword =  process.env.BASIC_PASSWORD || 'password';
-
         this.startPolling();
     }
 

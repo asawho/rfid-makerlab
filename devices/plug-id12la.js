@@ -1,4 +1,5 @@
-var SerialPort = require('serialport');
+const { SerialPort } = require('serialport');
+const { ReadlineParser } = require('@serialport/parser-readline');
 var rpio = require('rpio');
 var _ = require('lodash');
 
@@ -64,10 +65,8 @@ module.exports = class PlugID12LA {
         });
 
         //Start polling the RFID to watch for card scans
-        this.serialport = new SerialPort(this.rfidPort, { baudRate: 9600 });
-        var parser = new SerialPort.parsers.Readline('\n');
-
-        this.serialport.pipe(parser);
+        this.serialport = new SerialPort({ path: this.rfidPort, baudRate: 9600 });
+        const parser = this.serialport.pipe(new ReadlineParser({ delimiter: '\n' }))
         parser.on('data', (data) => {
             data = this.accessList.normalize(data, 'ID12LA');
 

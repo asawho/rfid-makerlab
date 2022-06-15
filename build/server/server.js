@@ -125,7 +125,7 @@ function setupAppServer(logger) {
             }
         });
     });
-    app.listen(80);
+    app.listen(3000);
     console.log('Application server Listening');
 }
 var deviceUpList = {};
