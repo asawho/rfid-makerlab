@@ -12,6 +12,8 @@ module.exports = {
                 rfidPort: '/dev/ttyUSB0',
                 email: process.env.WYZELOCK_EMAIL,
                 password: process.env.WYZELOCK_PASSWORD,
+                key_id: process.env.WYZELOCK_KEY_ID,
+                api_key: process.env.WYZELOCK_API_KEY,
                 mac: process.env.WYZELOCK_MAC
             }
         },

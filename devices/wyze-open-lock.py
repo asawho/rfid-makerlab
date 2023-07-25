@@ -10,10 +10,13 @@ from wyze_sdk.errors import WyzeApiError
 @click.command()
 @click.argument('email', required=True)
 @click.argument('password', required=True)
+@click.argument('key_id', required=True)
+@click.argument('api_key', required=True)
 @click.argument('device_mac', required=True)
-def main(email, password, device_mac):
-    client = Client(email=email, password=password, key_id=os.environ['WYZELOCK_KEY_ID'], api_key=os.environ['WYZELOCK_API_KEY'])
-    client.locks.unlock(device_mac=device_mac)
+def main(email, password, key_id, api_key, device_mac):
+    client = Client(email=email, password=password, key_id=key_id, api_key=api_key)
+    resp=client.locks.unlock(device_mac=device_mac)
+    resp.validate()
     print('Unlocked')
     # For later, doesn't work anyway
     # lock = client.locks.info(device_mac='')
